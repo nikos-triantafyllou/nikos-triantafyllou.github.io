@@ -1,4 +1,5 @@
-## Hi there 👋
+Nikolaos (Nikos) Triantafyllou
+PhD @ Scuola Normale Superiore di Pisa
 
 <!--
 **nikos-triantafyllou/nikos-triantafyllou** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
