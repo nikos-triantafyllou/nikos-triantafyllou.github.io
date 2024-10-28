@@ -1,27 +1,3 @@
-# _config.yml
-
-# Site settings
-title: "Your Site Title"
-description: "A description of your site"
-baseurl: "" # the subpath of your site, e.g., /blog
-url: "https://nikos-triantafyllou.com" # the base hostname & protocol for your site
-
-# Plugins
-plugins:
-  - jekyll-feed # Example of a plugin, add any others you need
-  - jekyll-sitemap
-
-# Exclude theme setting
-# theme: "bootstrap" # Removed because GitHub Pages doesn’t support this directly
-
-# Build settings
-markdown: kramdown
-highlighter: rouge
-
-# Additional Configurations
-paginate: 5 # Example: items per page if using pagination
-permalink: /:categories/:title/
-
-# Add this under your plugins or settings as required:
-include:
-  - assets/css
+theme: jekyll-theme-minimal
+title: Nikos Triantafyllou
+description: Personal Webpage
