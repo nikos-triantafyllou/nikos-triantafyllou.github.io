@@ -21,13 +21,7 @@ plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
 
-exclude:
-  - Gemfile
-  - Gemfile.lock
-  - .idea/
-  - .gitignore
-  - README.md
-timezone: North America/Toronto
+
 
 
 
