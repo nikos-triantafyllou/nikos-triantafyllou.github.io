@@ -1,52 +1,33 @@
-# theme: jekyll-theme-minimal
-# title: Nikos Triantafyllou's homepage
-# description: Personal webpage
-
+# config.yml
 
 # Site settings
-title: Nikos Triantafyllou
-email: nikolaos.triantafyllou@sns.it
-lang: en-US
+title: "Nikos Triantafyllou"
+description: "Website"
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://nikos-triantafyllou.github.io" # the base hostname & protocol for your site
 
-baseurl: "" # the subpath of your site, e.g. /blog/
-url: https://nikos-triantafyllou.github.io/ # the base hostname & protocol for your site
-git_address: https://github.com/nikos-triantafyllou
+# Theme settings
+theme: "bootstrap"
+bootstrap_theme: "cyborg" # Specify the Bootswatch theme here
 
-# theme options from https://bootswatch.com/3/
-# comment out this to use default Bootstrap
-bootwatch: cyborg # paper cerulean cosmo custom cyborg darkly flatly journal lumen readable sandstone simplex slate solar spacelab superhero united yeti
+# Plugins
+plugins:
+  - jekyll-feed # Example of a plugin, add any others you need
+  - jekyll-sitemap
+
+# Include additional CSS or JS files
+include:
+  - assets/css # Ensure this includes your CSS assets folder if using custom styles
+
+# Custom settings for Bootstrap and Bootswatch
+bootstrap_css: "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.0/cyborg/bootstrap.min.css"
+bootstrap_js: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
 
 # Build settings
 markdown: kramdown
 highlighter: rouge
-# Plugins (previously gems:)
-plugins:
-  - jekyll-feed
-  - jekyll-redirect-from
-  - jekyll-seo-tag
-  - jekyll-sitemap
 
-defaults:
-- scope:
-    path: _posts
-    type: posts
-  values:
-    layout: post
-    sectionid: blog
+# Add any additional configuration settings here
+paginate: 5 # Example: items per page if using pagination
+permalink: /:categories/:title/
 
-- scope:
-    path: _docs
-    type: docs
-  values:
-    layout: docs
-    sectionid: docs
-    seo:
-      type: "WebPage"
-
-collections:
-  docs:
-    permalink: /:collection/:path/
-    output: true
-  posts:
-    permalink: /blog/:year/:month/:day/:title/
-    output: true
