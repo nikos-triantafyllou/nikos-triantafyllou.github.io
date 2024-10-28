@@ -1,34 +1,27 @@
+# _config.yml
+
 # Site settings
-title: Nikos Triantafyllou
-email: nikolaos.triantafyllou@sns.it
-lang: en-US
+title: "Your Site Title"
+description: "A description of your site"
+baseurl: "" # the subpath of your site, e.g., /blog
+url: "https://nikos-triantafyllou.com" # the base hostname & protocol for your site
 
-baseurl: "" # the subpath of your site, e.g. /blog/
-url: https://nikos-triantafyllou.github.io/ # the base hostname & protocol for your site
-git_address: https://github.com/nikos-triantafyllou
+# Plugins
+plugins:
+  - jekyll-feed # Example of a plugin, add any others you need
+  - jekyll-sitemap
 
-# theme options from https://bootswatch.com/3/
-# comment out this to use default Bootstrap
-bootwatch: superhero # paper cerulean cosmo custom cyborg darkly flatly journal lumen readable sandstone simplex slate solar spacelab superhero united yeti
+# Exclude theme setting
+# theme: "bootstrap" # Removed because GitHub Pages doesn’t support this directly
 
 # Build settings
 markdown: kramdown
 highlighter: rouge
-# Plugins (previously gems:)
-plugins:
-  - jekyll-feed
-  - jekyll-redirect-from
-  - jekyll-seo-tag
-  - jekyll-sitemap
 
+# Additional Configurations
+paginate: 5 # Example: items per page if using pagination
+permalink: /:categories/:title/
 
-
-
-
-collections:
-  docs:
-    permalink: /:collection/:path/
-    output: true
-  posts:
-    permalink: /blog/:year/:month/:day/:title/
-    output: true
+# Add this under your plugins or settings as required:
+include:
+  - assets/css
