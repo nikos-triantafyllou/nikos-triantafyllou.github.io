@@ -1,4 +1,4 @@
-theme: jekyll-theme-minimal
+# theme: jekyll-theme-minimal
 title: Nikos Triantafyllou's homepage
 description: Personal webpage
 
@@ -6,3 +6,13 @@ description: Personal webpage
 # theme options from https://bootswatch.com/3/
 # comment out this to use default Bootstrap
 bootwatch: cyborg # paper cerulean cosmo custom cyborg darkly flatly journal lumen readable sandstone simplex slate solar spacelab superhero united yeti
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+# Plugins (previously gems:)
+plugins:
+  - jekyll-feed
+  - jekyll-redirect-from
+  - jekyll-seo-tag
+  - jekyll-sitemap
