@@ -2078,13 +2078,13 @@ input, select, textarea {
 			}
 
 		.icon.style1 {
-			color: #00ffcc;
+			color: #000000;
 		}
-
+                /* color_chnage */
 		.icon.style2 {
-			color: #00f0ff;
+			color: #000000;
 		}
-
+/* color_chnage */
 		.icon.style3 {
 			color: #76ddff;
 		}
@@ -2604,7 +2604,8 @@ input, select, textarea {
 
 			.features li:before {
 				display: block;
-				color: #873e23;
+				color: #873e23; 
+/* 				color_change */
 				position: absolute;
 				left: 1.75em;
 				top: 2.75em;
@@ -2817,7 +2818,8 @@ input, select, textarea {
 		}
 
 		.wrapper.style1 {
-			background-color: #21b2a6;
+			background-color: #000000;
+/* 			color_change */
 			color: #c8ece9;
 		}
 
