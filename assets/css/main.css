@@ -1949,7 +1949,9 @@ input, select, textarea {
 
 		input[type="checkbox"]:checked + label:before,
 		input[type="radio"]:checked + label:before {
-			background: #2e3842;
+/* 			background: #2e3842; */
+			background: #000000;
+/* 			color_change */
 			color: #fff;
 			content: '\f00c';
 		}
@@ -2980,7 +2982,9 @@ input, select, textarea {
 			}
 
 		.wrapper.style2 {
-			background-color: #2e3842;
+/* 			background-color: #2e3842; */
+			background-color: #000000;
+/* 			color_change */
 		}
 
 		.wrapper.style3 {
