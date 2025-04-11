@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>21cm Viewer</title>
+  <style>
+    .param-group { margin: 10px; display: inline-block; }
+    .buttons button { width: 30px; margin: 0 2px; }
+  </style>
+</head>
+<body>
+
+<h2>21cm Simulation Viewer</h2>
+<img id="main-image" src="img/id_21.png" width="800">
+
+<div id="controls"></div>
+
+<script>
+  const paramNames = [
+    'SIGMA_8', 'L_X', 'NU_X_THRESH', 'F_STAR10', 'ALPHA_STAR',
+    'F_ESC10', 'ALPHA_ESC', 't_STAR', 'SIGMA_SFR_LIM', 'M_TURN'
+  ];
+
+  const paramToId = i => [22 + i*2, 23 + i*2];
+  let paramValues = Array(10).fill(0);  // values: -1, 0, 1
+
+  function updateImage() {
+    let active = paramValues.findIndex(v => v !== 0);
+    let imgId = 21;
+    if (active !== -1) {
+      imgId = paramValues[active] === -1 ? paramToId(active)[0] : paramToId(active)[1];
+    }
+    document.getElementById('main-image').src = `img/id_${imgId}.png`;
+  }
+
+  function resetAll() {
+    paramValues = Array(10).fill(0);
+    document.querySelectorAll('.param-label').forEach((el, i) => {
+      el.innerText = `${paramNames[i]}: 0`;
+    });
+    updateImage();
+  }
+
+  function createControls() {
+    const controlsDiv = document.getElementById('controls');
+    paramNames.forEach((name, i) => {
+      const group = document.createElement('div');
+      group.className = 'param-group';
+
+      const label = document.createElement('div');
+      label.className = 'param-label';
+      label.innerText = `${name}: 0`;
+
+      const minusBtn = document.createElement('button');
+      minusBtn.innerText = '−';
+      minusBtn.onclick = () => {
+        resetAll();
+        paramValues[i] = -1;
+        label.innerText = `${name}: −`;
+        updateImage();
+      };
+
+      const resetBtn = document.createElement('button');
+      resetBtn.innerText = '⭘';
+      resetBtn.onclick = () => {
+        paramValues[i] = 0;
+        label.innerText = `${name}: 0`;
+        updateImage();
+      };
+
+      const plusBtn = document.createElement('button');
+      plusBtn.innerText = '+';
+      plusBtn.onclick = () => {
+        resetAll();
+        paramValues[i] = 1;
+        label.innerText = `${name}: +`;
+        updateImage();
+      };
+
+      const btnBox = document.createElement('div');
+      btnBox.className = 'buttons';
+      btnBox.append(minusBtn, resetBtn, plusBtn);
+
+      group.append(label, btnBox);
+      controlsDiv.appendChild(group);
+    });
+  }
+
+  createControls();
+</script>
+
+</body>
+</html>
