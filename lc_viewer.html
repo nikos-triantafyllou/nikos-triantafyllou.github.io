@@ -73,13 +73,18 @@
       background: var(--button-hover);
     }
 
-    #main-image {
+    #image-container {
       width: 100%;
       max-width: 1000px;
-      margin: 30px auto 20px;
-      display: block;
+      margin: 30px auto;
+      position: relative;
+    }
+
+    #image-container img {
+      width: 100%;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: none;
     }
 
     .row {
@@ -160,7 +165,7 @@
   <button id="toggle-theme">🌙 Dark Mode</button>
 </header>
 
-<img id="main-image" src="img/id_21.png" alt="21cm plot">
+<div id="image-container"></div>
 
 <div class="row" id="param-container"></div>
 
@@ -182,6 +187,18 @@
   let paramValues = Array(10).fill(0);
   let currentImageId = 21;
 
+  function preloadImages() {
+    const container = document.getElementById('image-container');
+    for (let i = 21; i <= 41; i++) {
+      const img = document.createElement('img');
+      img.id = `img-${i}`;
+      img.src = `img/id_${i}.png`;
+      img.alt = `Simulation ${i}`;
+      img.style.display = i === 21 ? 'block' : 'none';
+      container.appendChild(img);
+    }
+  }
+
   function updateImage() {
     const active = paramValues.findIndex(v => v !== 0);
     let imgId = 21;
@@ -190,8 +207,10 @@
     }
 
     if (imgId !== currentImageId) {
-      const img = document.getElementById('main-image');
-      img.src = `img/id_${imgId}.png?v=${imgId}`; // light cache-busting
+      const oldImg = document.getElementById(`img-${currentImageId}`);
+      const newImg = document.getElementById(`img-${imgId}`);
+      if (oldImg) oldImg.style.display = 'none';
+      if (newImg) newImg.style.display = 'block';
       currentImageId = imgId;
     }
   }
@@ -270,6 +289,7 @@
 
   document.getElementById('toggle-theme').addEventListener('click', toggleTheme);
 
+  preloadImages();
   createControls();
 </script>
 
