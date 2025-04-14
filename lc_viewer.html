@@ -6,25 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-  <!-- MathJax Configuration -->
+  <!-- MathJax Config -->
   <script>
     window.MathJax = {
       tex: { inlineMath: [['\\(', '\\)']] },
       chtml: {
         scale: 1.1,
-        displayAlign: "center",
-        displayIndent: "0em"
-      },
-      options: {
-        renderActions: {
-          addMenu: []
-        }
+        displayAlign: "center"
       }
     };
   </script>
-  <script type="text/javascript" async
-    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
   <style>
     :root {
@@ -91,25 +83,22 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    #controls {
+    .row {
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
-      max-width: 1000px;
-      margin: 0 auto 40px;
-      padding: 10px;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
     }
 
     .param-group {
       background: var(--card-bg);
       border-radius: 8px;
       padding: 10px 16px;
-      margin: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      width: 160px;
+      width: 180px;
       text-align: center;
       box-sizing: border-box;
-      flex-shrink: 0;
     }
 
     .param-label {
@@ -118,7 +107,6 @@
       display: block;
       font-size: 0.95rem;
       min-height: 2.4em;
-      line-height: 1.3em;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -129,10 +117,15 @@
       margin-left: 4px;
     }
 
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
     .buttons button {
       width: 36px;
       height: 36px;
-      margin: 0 4px;
       font-size: 1.2rem;
       border: none;
       border-radius: 50%;
@@ -142,25 +135,20 @@
       transition: background 0.2s, color 0.2s;
     }
 
-    .buttons .plus:hover {
+    .plus:hover {
       background-color: #d1f7d1;
       color: #1e5e1e;
     }
 
-    .buttons .minus:hover {
+    .minus:hover {
       background-color: #fbd1d1;
       color: #8a1d1d;
     }
 
-    .buttons {
-      display: flex;
-      justify-content: center;
-    }
-
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
       .param-group {
         width: 90%;
-        max-width: 320px;
+        max-width: 300px;
       }
     }
   </style>
@@ -174,7 +162,10 @@
 
 <img id="main-image" src="img/id_21.png" alt="21cm plot">
 
-<div id="controls"></div>
+<div id="controls">
+  <div class="row" id="row1"></div>
+  <div class="row" id="row2"></div>
+</div>
 
 <script>
   const xnames = [
@@ -194,7 +185,7 @@
   let paramValues = Array(10).fill(0);
 
   function updateImage() {
-    let active = paramValues.findIndex(v => v !== 0);
+    const active = paramValues.findIndex(v => v !== 0);
     let imgId = 21;
     if (active !== -1) {
       imgId = paramValues[active] === -1 ? paramToId(active)[0] : paramToId(active)[1];
@@ -212,7 +203,6 @@
   }
 
   function createControls() {
-    const controlsDiv = document.getElementById('controls');
     xnames.forEach((latex, i) => {
       const group = document.createElement('div');
       group.className = 'param-group';
@@ -261,17 +251,18 @@
       btnBox.append(minusBtn, resetBtn, plusBtn);
 
       group.append(label, btnBox);
-      controlsDiv.appendChild(group);
+
+      const row = i < 5 ? document.getElementById('row1') : document.getElementById('row2');
+      row.appendChild(group);
     });
 
     MathJax.typesetPromise();
   }
 
   function toggleTheme() {
-    const body = document.body;
+    document.body.classList.toggle('dark');
     const btn = document.getElementById('toggle-theme');
-    body.classList.toggle('dark');
-    btn.innerText = body.classList.contains('dark') ? '☀️ Light Mode' : '🌙 Dark Mode';
+    btn.innerText = document.body.classList.contains('dark') ? '☀️ Light Mode' : '🌙 Dark Mode';
   }
 
   document.getElementById('toggle-theme').addEventListener('click', toggleTheme);
