@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <title>21cm Lightcone Viewer</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
-  <!-- MathJax for LaTeX rendering -->
   <script type="text/javascript" async
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
   </script>
@@ -99,6 +97,15 @@
       margin-bottom: 8px;
       display: block;
       font-size: 0.95rem;
+      min-height: 2.4em;
+      min-width: 140px;
+      margin: 0 auto 8px;
+      line-height: 1.3em;
+    }
+
+    .suffix {
+      font-family: monospace;
+      margin-left: 4px;
     }
 
     .buttons button {
@@ -170,7 +177,7 @@
   function resetAll() {
     paramValues = Array(10).fill(0);
     document.querySelectorAll('.param-label').forEach((el, i) => {
-      el.innerHTML = `${xnames[i]}: 0`;
+      el.innerHTML = `${xnames[i]} <span class="suffix">: 0</span>`;
     });
     MathJax.typesetPromise();
     updateImage();
@@ -184,7 +191,7 @@
 
       const label = document.createElement('div');
       label.className = 'param-label';
-      label.innerHTML = `${latex}: 0`;
+      label.innerHTML = `${latex} <span class="suffix">: 0</span>`;
 
       const minusBtn = document.createElement('button');
       minusBtn.innerText = '−';
@@ -201,14 +208,14 @@
       minusBtn.onclick = () => {
         resetAll();
         paramValues[i] = -1;
-        label.innerHTML = `${latex}: −`;
+        label.innerHTML = `${latex} <span class="suffix">: −</span>`;
         MathJax.typesetPromise();
         updateImage();
       };
 
       resetBtn.onclick = () => {
         paramValues[i] = 0;
-        label.innerHTML = `${latex}: 0`;
+        label.innerHTML = `${latex} <span class="suffix">: 0</span>`;
         MathJax.typesetPromise();
         updateImage();
       };
@@ -216,7 +223,7 @@
       plusBtn.onclick = () => {
         resetAll();
         paramValues[i] = 1;
-        label.innerHTML = `${latex}: +`;
+        label.innerHTML = `${latex} <span class="suffix">: +</span>`;
         MathJax.typesetPromise();
         updateImage();
       };
