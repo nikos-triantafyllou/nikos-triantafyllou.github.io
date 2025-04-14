@@ -187,7 +187,7 @@
     if (active !== -1) {
       imgId = paramValues[active] === -1 ? paramToId(active)[0] : paramToId(active)[1];
     }
-    document.getElementById('main-image').src = `img/id_${imgId}.png`;
+    document.getElementById('main-image').src = `img/id_${imgId}.png?${Date.now()}`;
   }
 
   function resetAll() {
