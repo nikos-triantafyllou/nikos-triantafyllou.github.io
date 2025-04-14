@@ -137,25 +137,40 @@
     .minus:hover { background-color: #fbd1d1; color: #8a1d1d; }
 
     .param-bar {
+      margin-top: 12px;
       height: 16px;
       width: 100%;
       background: #eee;
       border-radius: 10px;
-      margin-top: 12px;
       position: relative;
+      overflow: hidden;
     }
 
     .bar-fill {
       height: 100%;
-      border-radius: 10px;
       background: linear-gradient(to right, #fbd1d1, #d1f7d1);
       transition: width 0.3s ease;
-      text-align: center;
-      line-height: 16px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-radius: 10px;
+      z-index: 1;
+    }
+
+    .bar-fill::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 0.85rem;
       color: #000;
-      white-space: nowrap;
-      overflow: hidden;
+      z-index: 2;
+      pointer-events: none;
     }
 
     @media (max-width: 700px) {
@@ -220,10 +235,10 @@
   }
 
   function updateBar(barFill, values, v) {
-    const percent = (v + 1) * 50; // -1 → 0%, 0 → 50%, +1 → 100%
-    const realVal = values[v + 1]; // map -1,0,+1 to index 0,1,2
+    const percent = (v + 1) * 50;
+    const realVal = values[v + 1];
     barFill.style.width = `${percent}%`;
-    barFill.textContent = realVal.toFixed(3);
+    barFill.setAttribute('data-label', realVal.toFixed(3));
   }
 
   function resetAll() {
