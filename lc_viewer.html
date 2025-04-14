@@ -52,6 +52,7 @@
       padding: 1rem 2rem;
       background: var(--card-bg);
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      flex-wrap: wrap;
     }
 
     header h2 {
@@ -68,6 +69,7 @@
       border-radius: 6px;
       cursor: pointer;
       transition: background 0.2s;
+      margin-top: 10px;
     }
 
     #toggle-theme:hover {
@@ -89,6 +91,9 @@
       flex-wrap: wrap;
       gap: 10px;
       margin-bottom: 20px;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .param-group {
@@ -96,7 +101,7 @@
       border-radius: 8px;
       padding: 10px 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      width: 180px;
+      flex: 0 0 180px;
       text-align: center;
       box-sizing: border-box;
     }
@@ -107,9 +112,10 @@
       display: block;
       font-size: 0.95rem;
       min-height: 2.4em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: unset;
+      line-height: 1.3em;
     }
 
     .suffix {
@@ -145,9 +151,9 @@
       color: #8a1d1d;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 600px) {
       .param-group {
-        width: 90%;
+        flex: 1 1 100%;
         max-width: 300px;
       }
     }
