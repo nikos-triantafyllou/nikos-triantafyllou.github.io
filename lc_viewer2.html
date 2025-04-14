@@ -136,6 +136,7 @@
     .plus:hover { background-color: #d1f7d1; color: #1e5e1e; }
     .minus:hover { background-color: #fbd1d1; color: #8a1d1d; }
 
+    /* Light mode bar background */
     .param-bar {
       margin-top: 12px;
       height: 16px;
@@ -146,10 +147,12 @@
       overflow: hidden;
     }
     
+    /* Dark mode bar background */
     body.dark .param-bar {
-      background: #444;
+      background: #333;
     }
     
+    /* Light mode gradient */
     .bar-fill {
       height: 100%;
       background: linear-gradient(to right, #f8cccc, #c8f6c8);
@@ -161,6 +164,12 @@
       z-index: 1;
     }
     
+    /* Dark mode gradient override */
+    body.dark .bar-fill {
+      background: linear-gradient(to right, #aa4444, #339966);
+    }
+    
+    /* Value label inside bar */
     .bar-label {
       position: absolute;
       left: 50%;
@@ -177,6 +186,7 @@
       color: #000;
     }
     
+    /* Value label in dark mode */
     body.dark .bar-label {
       color: #fff;
     }
