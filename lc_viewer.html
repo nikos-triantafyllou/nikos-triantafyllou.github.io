@@ -105,11 +105,17 @@
       cursor: pointer;
       background: var(--button-bg);
       color: var(--text-color);
-      transition: all 0.2s ease;
+      transition: background 0.2s, color 0.2s;
     }
 
-    .buttons button:hover {
-      background: var(--button-hover);
+    .buttons .plus:hover {
+      background-color: #d1f7d1;
+      color: #1e5e1e;
+    }
+
+    .buttons .minus:hover {
+      background-color: #fbd1d1;
+      color: #8a1d1d;
     }
 
     .buttons {
@@ -167,6 +173,16 @@
 
       const minusBtn = document.createElement('button');
       minusBtn.innerText = '−';
+      minusBtn.className = 'minus';
+
+      const resetBtn = document.createElement('button');
+      resetBtn.innerText = '⭘';
+      resetBtn.className = 'reset';
+
+      const plusBtn = document.createElement('button');
+      plusBtn.innerText = '+';
+      plusBtn.className = 'plus';
+
       minusBtn.onclick = () => {
         resetAll();
         paramValues[i] = -1;
@@ -174,16 +190,12 @@
         updateImage();
       };
 
-      const resetBtn = document.createElement('button');
-      resetBtn.innerText = '⭘';
       resetBtn.onclick = () => {
         paramValues[i] = 0;
         label.innerText = `${name}: 0`;
         updateImage();
       };
 
-      const plusBtn = document.createElement('button');
-      plusBtn.innerText = '+';
       plusBtn.onclick = () => {
         resetAll();
         paramValues[i] = 1;
