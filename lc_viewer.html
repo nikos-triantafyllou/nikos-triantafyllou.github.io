@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <title>21cm Lightcone Viewer</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- MathJax for LaTeX -->
+  <script type="text/javascript" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
   <style>
     :root {
       --bg-color: #f5f7fa;
@@ -136,9 +142,17 @@
 <div id="controls"></div>
 
 <script>
-  const paramNames = [
-    'SIGMA_8', 'L_X', 'NU_X_THRESH', 'F_STAR10', 'ALPHA_STAR',
-    'F_ESC10', 'ALPHA_ESC', 't_STAR', 'SIGMA_SFR_LIM', 'M_TURN'
+  const xnames = [
+    '\\(\\sigma_8\\)',
+    '\\(\\log_{10}(L_{X<2keV}/\\text{SFR} / (\\text{erg s}^{-1} M_\\odot^{-1} \\text{yr}^{-1}))\\)',
+    '\\(E_0\\;[\\text{eV}]\\)',
+    '\\(\\log_{10}(f_{\\ast,10})\\)',
+    '\\(\\alpha_\\ast\\)',
+    '\\(\\log_{10}(f_{\\text{esc},10})\\)',
+    '\\(\\alpha_{\\text{esc}}\\)',
+    '\\(t_\\ast\\)',
+    '\\(\\sigma_{\\text{SFR,LIM}}\\)',
+    '\\(\\log_{10}(M_{\\text{turn}} / M_\\odot)\\)'
   ];
 
   const paramToId = i => [22 + i * 2, 23 + i * 2];
@@ -156,20 +170,21 @@
   function resetAll() {
     paramValues = Array(10).fill(0);
     document.querySelectorAll('.param-label').forEach((el, i) => {
-      el.innerText = `${paramNames[i]}: 0`;
+      el.innerHTML = `${xnames[i]}: 0`;
+      MathJax.typesetPromise([el]);
     });
     updateImage();
   }
 
   function createControls() {
     const controlsDiv = document.getElementById('controls');
-    paramNames.forEach((name, i) => {
+    xnames.forEach((latex, i) => {
       const group = document.createElement('div');
       group.className = 'param-group';
 
       const label = document.createElement('div');
       label.className = 'param-label';
-      label.innerText = `${name}: 0`;
+      label.innerHTML = `${latex}: 0`;
 
       const minusBtn = document.createElement('button');
       minusBtn.innerText = '−';
@@ -186,20 +201,23 @@
       minusBtn.onclick = () => {
         resetAll();
         paramValues[i] = -1;
-        label.innerText = `${name}: −`;
+        label.innerHTML = `${latex}: −`;
+        MathJax.typesetPromise([label]);
         updateImage();
       };
 
       resetBtn.onclick = () => {
         paramValues[i] = 0;
-        label.innerText = `${name}: 0`;
+        label.innerHTML = `${latex}: 0`;
+        MathJax.typesetPromise([label]);
         updateImage();
       };
 
       plusBtn.onclick = () => {
         resetAll();
         paramValues[i] = 1;
-        label.innerText = `${name}: +`;
+        label.innerHTML = `${latex}: +`;
+        MathJax.typesetPromise([label]);
         updateImage();
       };
 
@@ -209,6 +227,7 @@
 
       group.append(label, btnBox);
       controlsDiv.appendChild(group);
+      MathJax.typesetPromise([label]);
     });
   }
 
