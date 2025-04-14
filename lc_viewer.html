@@ -5,22 +5,59 @@
   <title>21cm Lightcone Viewer</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-color: #f5f7fa;
+      --text-color: #333;
+      --card-bg: #ffffff;
+      --button-bg: #e0e7ff;
+      --button-hover: #c7d2fe;
+    }
+
+    body.dark {
+      --bg-color: #1e1e1e;
+      --text-color: #f0f0f0;
+      --card-bg: #2a2a2a;
+      --button-bg: #444;
+      --button-hover: #666;
+    }
+
     body {
       margin: 0;
       padding: 0;
       font-family: 'Inter', sans-serif;
-      background: #f5f7fa;
-      color: #333;
+      background: var(--bg-color);
+      color: var(--text-color);
       text-align: center;
+      transition: background 0.3s, color 0.3s;
     }
 
-    h2 {
-      font-size: 2rem;
-      font-weight: 600;
-      padding: 1rem;
-      margin: 0;
-      background: #ffffff;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: var(--card-bg);
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    header h2 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    #toggle-theme {
+      background: var(--button-bg);
+      color: var(--text-color);
+      border: none;
+      padding: 8px 14px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #toggle-theme:hover {
+      background: var(--button-hover);
     }
 
     #main-image {
@@ -42,7 +79,7 @@
     }
 
     .param-group {
-      background: #fff;
+      background: var(--card-bg);
       border-radius: 8px;
       padding: 10px 16px;
       margin: 10px;
@@ -66,13 +103,13 @@
       border: none;
       border-radius: 50%;
       cursor: pointer;
-      background: #e0e7ff;
-      color: #333;
+      background: var(--button-bg);
+      color: var(--text-color);
       transition: all 0.2s ease;
     }
 
     .buttons button:hover {
-      background: #c7d2fe;
+      background: var(--button-hover);
     }
 
     .buttons {
@@ -83,7 +120,10 @@
 </head>
 <body>
 
-<h2>21cm Lightcone Simulation Viewer</h2>
+<header>
+  <h2>21cm Lightcone Viewer</h2>
+  <button id="toggle-theme">🌙 Dark Mode</button>
+</header>
 
 <img id="main-image" src="img/id_21.png" alt="21cm plot">
 
@@ -96,7 +136,7 @@
   ];
 
   const paramToId = i => [22 + i * 2, 23 + i * 2];
-  let paramValues = Array(10).fill(0); // values: -1, 0, 1
+  let paramValues = Array(10).fill(0);
 
   function updateImage() {
     let active = paramValues.findIndex(v => v !== 0);
@@ -159,6 +199,15 @@
       controlsDiv.appendChild(group);
     });
   }
+
+  function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('toggle-theme');
+    body.classList.toggle('dark');
+    btn.innerText = body.classList.contains('dark') ? '☀️ Light Mode' : '🌙 Dark Mode';
+  }
+
+  document.getElementById('toggle-theme').addEventListener('click', toggleTheme);
 
   createControls();
 </script>
