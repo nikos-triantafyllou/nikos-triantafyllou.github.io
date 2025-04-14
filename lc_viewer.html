@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <title>21cm Lightcone Viewer</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  
-  <!-- MathJax for LaTeX -->
+
+  <!-- MathJax for LaTeX rendering -->
   <script type="text/javascript" async
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
   </script>
@@ -143,17 +143,17 @@
 
 <script>
   const xnames = [
-  '\\(\\sigma_8\\)',
-  '\\(\\log_{10}(L_{\\text{X}<2\\text{keV}} / \\text{SFR})\\)<br>\\(\\text{[erg s}^{-1} M_\\odot^{-1} \\text{yr}^{-1}]\\)',
-  '\\(E_0\\;[\\text{eV}]\\)',
-  '\\(\\log_{10}(f_{\\ast,10})\\)',
-  '\\(\\alpha_\\ast\\)',
-  '\\(\\log_{10}(f_{\\text{esc},10})\\)',
-  '\\(\\alpha_{\\text{esc}}\\)',
-  '\\(t_\\ast\\)',
-  '\\(\\sigma_{\\text{SFR,LIM}}\\)',
-  '\\(\\log_{10}(M_{\\text{turn}} / M_\\odot)\\)'
-];
+    '\\(\\sigma_8\\)',
+    '\\(\\log_{10}(L_{\\text{X}<2\\text{keV}} / \\text{SFR})\\)<br>\\(\\text{[erg s}^{-1} M_\\odot^{-1} \\text{yr}^{-1}]\\)',
+    '\\(E_0\\;[\\text{eV}]\\)',
+    '\\(\\log_{10}(f_{\\ast,10})\\)',
+    '\\(\\alpha_\\ast\\)',
+    '\\(\\log_{10}(f_{\\text{esc},10})\\)',
+    '\\(\\alpha_{\\text{esc}}\\)',
+    '\\(t_\\ast\\)',
+    '\\(\\sigma_{\\text{SFR,LIM}}\\)',
+    '\\(\\log_{10}(M_{\\text{turn}} / M_\\odot)\\)'
+  ];
 
   const paramToId = i => [22 + i * 2, 23 + i * 2];
   let paramValues = Array(10).fill(0);
@@ -171,8 +171,8 @@
     paramValues = Array(10).fill(0);
     document.querySelectorAll('.param-label').forEach((el, i) => {
       el.innerHTML = `${xnames[i]}: 0`;
-      MathJax.typesetPromise([el]);
     });
+    MathJax.typesetPromise();
     updateImage();
   }
 
@@ -202,14 +202,14 @@
         resetAll();
         paramValues[i] = -1;
         label.innerHTML = `${latex}: −`;
-        MathJax.typesetPromise([label]);
+        MathJax.typesetPromise();
         updateImage();
       };
 
       resetBtn.onclick = () => {
         paramValues[i] = 0;
         label.innerHTML = `${latex}: 0`;
-        MathJax.typesetPromise([label]);
+        MathJax.typesetPromise();
         updateImage();
       };
 
@@ -217,7 +217,7 @@
         resetAll();
         paramValues[i] = 1;
         label.innerHTML = `${latex}: +`;
-        MathJax.typesetPromise([label]);
+        MathJax.typesetPromise();
         updateImage();
       };
 
@@ -227,8 +227,9 @@
 
       group.append(label, btnBox);
       controlsDiv.appendChild(group);
-      MathJax.typesetPromise([label]);
     });
+
+    MathJax.typesetPromise();
   }
 
   function toggleTheme() {
