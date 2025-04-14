@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>21cm Lightcone Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']] },
+      chtml: { scale: 1.1, displayAlign: 'center' }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f5f7fa;
+      --text-color: #333;
+      --card-bg: #ffffff;
+      --button-bg: #e0e7ff;
+      --button-hover: #c7d2fe;
+    }
+
+    body.dark {
+      --bg-color: #1e1e1e;
+      --text-color: #f0f0f0;
+      --card-bg: #2a2a2a;
+      --button-bg: #444;
+      --button-hover: #666;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      text-align: center;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: var(--card-bg);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      flex-wrap: wrap;
+    }
+
+    #toggle-theme {
+      background: var(--button-bg);
+      color: var(--text-color);
+      border: none;
+      padding: 8px 14px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 10px;
+    }
+
+    #toggle-theme:hover {
+      background: var(--button-hover);
+    }
+
+    #image-container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 30px auto;
+      position: relative;
+    }
+
+    #image-container img {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    .row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin: 30px auto;
+      max-width: 1300px;
+    }
+
+    .param-group {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      width: 240px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    .param-label {
+      font-weight: 500;
+      margin-bottom: 14px;
+      font-size: 0.95rem;
+      line-height: 1.4em;
+      min-height: 3.4em;
+      max-height: 3.4em;
+      overflow: hidden;
+    }
+
+    .suffix {
+      font-family: monospace;
+      margin-left: 4px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .buttons button {
+      width: 42px;
+      height: 42px;
+      font-size: 1.3rem;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      background: var(--button-bg);
+      color: var(--text-color);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .plus:hover { background-color: #d1f7d1; color: #1e5e1e; }
+    .minus:hover { background-color: #fbd1d1; color: #8a1d1d; }
+
+    .param-bar {
+      height: 16px;
+      width: 100%;
+      background: #eee;
+      border-radius: 10px;
+      margin-top: 12px;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 10px;
+      background: linear-gradient(to right, #fbd1d1, #d1f7d1);
+      transition: width 0.3s ease;
+      text-align: center;
+      line-height: 16px;
+      font-size: 0.85rem;
+      color: #000;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    @media (max-width: 700px) {
+      .param-group {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>21cm Lightcone Viewer</h2>
+  <button id="toggle-theme">🌙 Dark Mode</button>
+</header>
+
+<div id="image-container"></div>
+<div class="row" id="param-container"></div>
+
+<script>
+  const xnames = [
+    '\\(\\sigma_8\\)', '\\(\\log_{10}(L_X / \\text{SFR})\\)<br>\\([\\text{erg s}^{-1} M_\\odot^{-1} \\text{yr}^{-1}]\\)',
+    '\\(E_0\\;[\\text{eV}]\\)', '\\(\\log_{10}(f_{\\ast,10})\\)', '\\(\\alpha_\\ast\\)',
+    '\\(\\log_{10}(f_{\\text{esc},10})\\)', '\\(\\alpha_{\\text{esc}}\\)', '\\(t_\\ast\\)',
+    '\\(\\sigma_{\\text{SFR,LIM}}\\)', '\\(\\log_{10}(M_{\\text{turn}} / M_\\odot)\\)'
+  ];
+
+  const paramRealValues = [
+    [0.801, 0.811, 0.821], [39.5, 40.5, 41.5], [250, 500, 750],
+    [-2.3, -1.3, -0.3], [0.2, 0.5, 0.8], [-1.3, -1.0, -0.7],
+    [-1.0, -0.5, 0.0], [0.2, 0.5, 0.8], [0.0, 0.19, 1.0], [8, 9, 10]
+  ];
+
+  const paramToId = i => [22 + i * 2, 23 + i * 2];
+  let paramValues = Array(10).fill(0);
+  let currentImageId = 21;
+
+  function preloadImages() {
+    const container = document.getElementById('image-container');
+    for (let i = 21; i <= 41; i++) {
+      const img = document.createElement('img');
+      img.id = `img-${i}`;
+      img.src = `img/id_${i}.png`;
+      img.alt = `Simulation ${i}`;
+      img.style.display = i === 21 ? 'block' : 'none';
+      container.appendChild(img);
+    }
+  }
+
+  function updateImage() {
+    const active = paramValues.findIndex(v => v !== 0);
+    let imgId = 21;
+    if (active !== -1) {
+      imgId = paramValues[active] === -1 ? paramToId(active)[0] : paramToId(active)[1];
+    }
+    if (imgId !== currentImageId) {
+      document.getElementById(`img-${currentImageId}`).style.display = 'none';
+      document.getElementById(`img-${imgId}`).style.display = 'block';
+      currentImageId = imgId;
+    }
+  }
+
+  function updateBar(barFill, values, v) {
+    const percent = (v + 1) * 50; // -1 → 0%, 0 → 50%, +1 → 100%
+    const realVal = values[v + 1]; // map -1,0,+1 to index 0,1,2
+    barFill.style.width = `${percent}%`;
+    barFill.textContent = realVal.toFixed(3);
+  }
+
+  function resetAll() {
+    paramValues = Array(10).fill(0);
+    document.querySelectorAll('.param-label').forEach((el, i) => {
+      el.innerHTML = `${xnames[i]} <span class="suffix">: 0</span>`;
+    });
+    document.querySelectorAll('.bar-fill').forEach((bar, i) => {
+      updateBar(bar, paramRealValues[i], 0);
+    });
+    MathJax.typesetPromise();
+    updateImage();
+  }
+
+  function createControls() {
+    const container = document.getElementById('param-container');
+    xnames.forEach((latex, i) => {
+      const group = document.createElement('div');
+      group.className = 'param-group';
+
+      const label = document.createElement('div');
+      label.className = 'param-label';
+      label.innerHTML = `${latex} <span class="suffix">: 0</span>`;
+
+      const minusBtn = document.createElement('button');
+      const resetBtn = document.createElement('button');
+      const plusBtn = document.createElement('button');
+      minusBtn.textContent = '−'; minusBtn.className = 'minus';
+      resetBtn.textContent = '⭘'; resetBtn.className = 'reset';
+      plusBtn.textContent = '+'; plusBtn.className = 'plus';
+
+      const bar = document.createElement('div');
+      bar.className = 'param-bar';
+      const barFill = document.createElement('div');
+      barFill.className = 'bar-fill';
+      bar.appendChild(barFill);
+      updateBar(barFill, paramRealValues[i], 0);
+
+      minusBtn.onclick = () => {
+        resetAll();
+        paramValues[i] = -1;
+        label.innerHTML = `${latex} <span class="suffix">: −</span>`;
+        updateBar(barFill, paramRealValues[i], -1);
+        MathJax.typesetPromise();
+        updateImage();
+      };
+      resetBtn.onclick = () => {
+        paramValues[i] = 0;
+        label.innerHTML = `${latex} <span class="suffix">: 0</span>`;
+        updateBar(barFill, paramRealValues[i], 0);
+        MathJax.typesetPromise();
+        updateImage();
+      };
+      plusBtn.onclick = () => {
+        resetAll();
+        paramValues[i] = 1;
+        label.innerHTML = `${latex} <span class="suffix">: +</span>`;
+        updateBar(barFill, paramRealValues[i], 1);
+        MathJax.typesetPromise();
+        updateImage();
+      };
+
+      const btnBox = document.createElement('div');
+      btnBox.className = 'buttons';
+      btnBox.append(minusBtn, resetBtn, plusBtn);
+
+      group.append(label, btnBox, bar);
+      container.appendChild(group);
+    });
+    MathJax.typesetPromise();
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle('dark');
+    const btn = document.getElementById('toggle-theme');
+    btn.innerText = document.body.classList.contains('dark') ? '☀️ Light Mode' : '🌙 Dark Mode';
+  }
+
+  document.getElementById('toggle-theme').addEventListener('click', toggleTheme);
+  preloadImages();
+  createControls();
+</script>
+
+</body>
+</html>
