@@ -3,7 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>21cm Lightcone Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- MathJax Configuration -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']] },
+      chtml: {
+        scale: 1.1,
+        displayAlign: "center",
+        displayIndent: "0em"
+      },
+      options: {
+        renderActions: {
+          addMenu: []
+        }
+      }
+    };
+  </script>
   <script type="text/javascript" async
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
   </script>
@@ -88,8 +106,10 @@
       padding: 10px 16px;
       margin: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      min-width: 160px;
+      width: 160px;
       text-align: center;
+      box-sizing: border-box;
+      flex-shrink: 0;
     }
 
     .param-label {
@@ -98,9 +118,10 @@
       display: block;
       font-size: 0.95rem;
       min-height: 2.4em;
-      min-width: 140px;
-      margin: 0 auto 8px;
       line-height: 1.3em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .suffix {
@@ -134,6 +155,13 @@
     .buttons {
       display: flex;
       justify-content: center;
+    }
+
+    @media (max-width: 600px) {
+      .param-group {
+        width: 90%;
+        max-width: 320px;
+      }
     }
   </style>
 </head>
