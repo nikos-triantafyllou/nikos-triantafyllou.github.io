@@ -94,20 +94,20 @@
     .param-group {
       background: var(--card-bg);
       border-radius: 8px;
-      padding: 17px 19px;            /* was 12px 16px → now taller */
+      padding: 18px 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       width: 240px;
       box-sizing: border-box;
       text-align: center;
     }
-    
+
     .param-label {
       font-weight: 500;
-      margin-bottom: 13px;           /* a little more space under label */
+      margin-bottom: 14px;
       font-size: 0.95rem;
       line-height: 1.4em;
-      min-height: 3.3em;             /* taller label block */
-      max-height: 3.2em;
+      min-height: 3.4em;
+      max-height: 3.4em;
       overflow: hidden;
     }
 
@@ -180,6 +180,7 @@
 
   const paramToId = i => [22 + i * 2, 23 + i * 2];
   let paramValues = Array(10).fill(0);
+  let currentImageId = 21;
 
   function updateImage() {
     const active = paramValues.findIndex(v => v !== 0);
@@ -187,7 +188,12 @@
     if (active !== -1) {
       imgId = paramValues[active] === -1 ? paramToId(active)[0] : paramToId(active)[1];
     }
-    document.getElementById('main-image').src = `img/id_${imgId}.png?${Date.now()}`;
+
+    if (imgId !== currentImageId) {
+      const img = document.getElementById('main-image');
+      img.src = `img/id_${imgId}.png?v=${imgId}`; // light cache-busting
+      currentImageId = imgId;
+    }
   }
 
   function resetAll() {
