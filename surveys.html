@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>150 MHz Sky Map — Survey Footprints</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0b0c10;
+    --panel: #14161c;
+    --line: #2a2d36;
+    --text: #e9e6de;
+    --muted: #9a9791;
+    --accent: #ff8a3d;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Serif 4', Georgia, serif;
+  }
+  header {
+    padding: 28px 32px 10px 32px;
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 {
+    margin: 0 0 6px 0;
+    font-weight: 600;
+    font-size: 1.7rem;
+    letter-spacing: 0.2px;
+  }
+  header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.98rem;
+    max-width: 70ch;
+    line-height: 1.5;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 96px);
+  }
+  aside {
+    border-right: 1px solid var(--line);
+    padding: 22px 20px;
+    background: var(--panel);
+  }
+  aside h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 14px 0;
+    text-transform: lowercase;
+  }
+  .survey-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.95rem;
+  }
+  .survey-row input {
+    accent-color: var(--accent);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+  }
+  .swatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+  .actions {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 10px;
+  }
+  button {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    padding: 7px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  button:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  main {
+    padding: 18px 18px 0 18px;
+    display: flex;
+    flex-direction: column;
+  }
+  #plot {
+    width: 100%;
+    height: 74vh;
+    min-height: 460px;
+  }
+  .note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    padding: 10px 4px 20px 4px;
+  }
+  @media (max-width: 820px) {
+    .layout { grid-template-columns: 1fr; }
+    aside { border-right: none; border-bottom: 1px solid var(--line); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>150 MHz Sky Map</h1>
+  <p>Global Sky Model background with overlaid instrument and survey footprints. Toggle footprints on the left to compare coverage.</p>
+</header>
+
+<div class="layout">
+  <aside>
+    <h2>survey footprints</h2>
+    <div id="survey-list"></div>
+    <div class="actions">
+      <button id="btn-all">All</button>
+      <button id="btn-none">None</button>
+    </div>
+  </aside>
+
+  <main>
+    <div id="plot"></div>
+    <div class="note">RA in hours (0&ndash;24) &middot; Dec in degrees &middot; background is log&#8330;&#8320; brightness temperature at 150&nbsp;MHz</div>
+  </main>
+</div>
+
+<script src="surveys_folder/app.js"></script>
+</body>
+</html>
