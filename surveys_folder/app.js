@@ -149,10 +149,17 @@ function parseCSV(text) {
 function loadCsvRows(csvText) {
   const rows = parseCSV(csvText);
   if (rows.length === 0) return [];
-  const header = rows[0].map(h => h.trim().toLowerCase());
+
+  // Find the real header row by looking for the show_on_map column, rather
+  // than assuming row 0 is the header — sheets often have a notes/title row
+  // above the actual column headers (e.g. a "Generic references" row).
+  let headerIdx = rows.findIndex(r => r.some(c => c.trim().toLowerCase() === "show_on_map"));
+  if (headerIdx === -1) headerIdx = 0; // fallback: no marker found, assume row 0
+
+  const header = rows[headerIdx].map(h => h.trim().toLowerCase());
   const keys = header.map(h => HEADER_ALIASES[h] || null);
   const records = [];
-  for (let r = 1; r < rows.length; r++) {
+  for (let r = headerIdx + 1; r < rows.length; r++) {
     const raw = rows[r];
     if (!raw.some(c => c.trim())) continue;
     const rec = {};
