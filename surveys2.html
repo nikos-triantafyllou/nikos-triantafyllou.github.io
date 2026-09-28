@@ -204,6 +204,28 @@
     color: var(--text);
   }
 
+  .hoverfields {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .field-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.88rem;
+  }
+  .field-row input {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
   @media (max-width: 820px) {
     .layout { grid-template-columns: 1fr; }
     aside { border-right: none; border-bottom: 1px solid var(--line); }
@@ -240,6 +262,11 @@
         <button id="btn-toggle-unranged" class="active">Unranged: shown</button>
       </div>
       <div class="note" style="padding: 8px 0 0 0;">"Unranged" = surveys with no listed z range in the sheet.</div>
+    </div>
+
+    <div class="hoverfields">
+      <h2>hover info shows</h2>
+      <div id="hoverfield-list"></div>
     </div>
   </aside>
 
