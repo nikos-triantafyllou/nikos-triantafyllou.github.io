@@ -477,11 +477,22 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-// ---- hover-info field picker: checkboxes for which metadata columns show
-// up in the tooltip when hovering a footprint. ----
+// ---- hover-info field picker: a dropdown of checkboxes for which metadata
+// columns show up in the tooltip when hovering a footprint. ----
 function buildHoverFieldsUI(hoverSelected, updateHoverTexts) {
   const list = document.getElementById('hoverfield-list');
-  if (!list) return;
+  const toggle = document.getElementById('hoverfields-toggle');
+  const countEl = document.getElementById('hoverfields-count');
+  if (!list || !toggle) return;
+
+  function updateCount() {
+    countEl.textContent = hoverSelected.size > 0 ? `(${hoverSelected.size})` : '';
+  }
+
+  function closePanel() {
+    list.classList.remove('open');
+    toggle.classList.remove('open');
+  }
 
   METADATA_FIELDS.forEach(f => {
     const row = document.createElement('label');
@@ -493,6 +504,7 @@ function buildHoverFieldsUI(hoverSelected, updateHoverTexts) {
     checkbox.addEventListener('change', () => {
       if (checkbox.checked) hoverSelected.add(f.key);
       else hoverSelected.delete(f.key);
+      updateCount();
       updateHoverTexts();
     });
 
@@ -503,6 +515,18 @@ function buildHoverFieldsUI(hoverSelected, updateHoverTexts) {
     row.appendChild(label);
     list.appendChild(row);
   });
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = list.classList.toggle('open');
+    toggle.classList.toggle('open', isOpen);
+  });
+  // clicking anywhere outside the panel closes it; clicks inside (including
+  // on a checkbox/label) don't propagate to this listener.
+  list.addEventListener('click', (e) => e.stopPropagation());
+  document.addEventListener('click', closePanel);
+
+  updateCount();
 }
 
 function buildSidebar(groupTraceIndices, resolvedColors, checkedState, applyVisibility) {
