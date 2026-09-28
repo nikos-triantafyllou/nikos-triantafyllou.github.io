@@ -1,44 +1,44 @@
-,,,,,,,,,,,,,,"Generic references (e.g., with tables): Table 1 of Maitra+2025 , Sam+2026 , Sam+2025 ",,Website options,,,
-,Survey ,Telescope,Instrument,type,targeting line/ spectrum region/ filters,Space or ground,Year,~ Total area (in sq. deg),"Depth (L in erg/s, F in erg/s/cm^2)",AB limiting magnitude ,z accuracy,z range,field,references,,show_on_map,points_override,color,default_visible
-,JWST,,,,,,,,,,,,,,,,,,
-,FRESCO,JWST,"NIRCam, grism",Grism + photometry,"[OIII], Ha, Hb",s,,0.04,complete to Muv-19 and -20 for z=6 and z=8 respect. F(Ha) = 2 * 10−18,28.2,0.01,,"GOODS-S (0.02), GOODS-N (0.02)",Oesch+2023 ,,TRUE,,,TRUE
-,JADES,JWST,NIRCam,"photometry, spectroscopy",,s,,0.05,,,,5.8 - 8, GOODS-S,Eisenstein+2025 ,,TRUE,,,TRUE
-,JADES-shallow,JWST,,,,s,,0.004,,,,, GOODS-S,,,FALSE,,,FALSE
-,JADES-medium,JWST,,,,s,,0.007,,,,, GOODS-S,,,FALSE,,,FALSE
-,JADES-deep,JWST,,,,s,,0.005,,,,, GOODS-S,,,FALSE,,,FALSE
-,PRIMER,JWST,NIRCam,photometry,UV,s,,0.1,complete to Muv ~ -18 for all the z range,,,9-13,"COSMOS, UDS",Donnan+2024,,FALSE,,,FALSE
-,CEERS,JWST,"NIRCam, MIRI, NIRSpec","photometry, spectroscopy","UV, emission lines",s,cycle 1,0.03,,,,6-9,EGS,Finkelstein+2025,,FALSE,,,FALSE
-,NGDEEP,JWST,"NIRCam, NIRISS","photometry, spectroscopy",,s,,0.001,"F_line = 1.2*10^-18, Muv =-17.5 at z=10",,,,HUDF (GOODS-S),Bagley+2023 ,,FALSE,,,FALSE
-,COSMOS-Web,JWST,"NIRCam, MIRI",Photometry,UV,s,cycle 1,0.54,Muv depth of  –19.6 for z=7-8,,Δz=1,6 - 13 ,COSMOS,"Casey+2022 , Website ",,FALSE,,,FALSE
-,COSMOS2025 (catalog),JWST (plus some ground based),"NIRCam, MIRI",Photometry,,,,0.54,,,0.1,,,Shuntov+2025 ,,FALSE,,,FALSE
-,COSMOS-3D,JWST,NIRCam/WFSS,grism,[OIII],s,cycle 3,0.33,"2x shallower than fresco, 4000 galaxies above z=5, 800 galaxies between 7 and 9.",,,6.75-9.05,COSMOS,"Proposal (Kakiichi+2024) , Mayer+2025 , Webpage ,https://jwst-cosmos3d.github.io/ ",,FALSE,,,FALSE
-,CAPERS,JWST,NIRSpec,slit spectroscopy,,s,cycle 3,~ 0.2,,28,,,CANDELS,Dickinson+; https://arxiv.org/pdf/2507.10518; https://arxiv.org/pdf/2504.12504,,FALSE,,,FALSE
-,,,,,,,,,,,,,,,,FALSE,,,FALSE
-,Subaru,,,,,,,,,,,,,,,,,,
-,HSC-SSP,Subaru,,Narrow-band,Lya,g,,,,,,,,,,,,,
-,CHORUS,Subaru,,Narrow-band,Lya,g,,,,,,,,,,,,,
-,SILVERRUSH,Subaru,,Narrow-band,Lya,g,,24,"20,000 LAEs/  ",26,0.05,2.2−7.3 ,,Umeda+2024,,,,,
-,PFS-SSP,Subaru,,Narrow-band,Lya,g,,15,,,,5.7-6.6,,Greene+2022 ,,,,,
-,SUBARU ULTRA-DEEP,Subaru,,Narrow-band,Lya,g,,, L = 2.4 * 10^42 ,,,7.3,,Konno+2014 ,,,,,
-,,,,,,,,,,,,,,,,,,,
-,VLT - ELT,,,,,,,,,,,,,,,,,,
-,MUSE-deep,VLT,,IFU,Lya,g,,,F = 2*10^-18,,,,,,,,,,
-,MUSE-wide,VLT,,IFU,Lya,g,,0.006,F = 2.5*10^-19,,,<6,,Urrutia+2028 ,,,,,
-,MUSE (MXDF),VLT,,IFU,Lya,,,,,,, 2.8 − 6.6 ,,Vitte+2024 ,,,,,
+,,,,,,,,,,,,,,"Generic references (e.g., with tables): Table 1 of Maitra+2025 , Sam+2026 , Sam+2025 ",,Website options,Website options,,,
+,Survey ,Telescope,Instrument,type,targeting line/ spectrum region/ filters,Space or ground,Year,~ Total area (in sq. deg),"Depth (L in erg/s, F in erg/s/cm^2)",AB limiting magnitude ,z accuracy,z range,field,references,,,show_on_map,points_override,color,default_visible
+,JWST,,,,,,,,,,,,,,,,,,,
+,FRESCO,JWST,"NIRCam, grism",Grism + photometry,"[OIII], Ha, Hb",s,,0.04,complete to Muv-19 and -20 for z=6 and z=8 respect. F(Ha) = 2 * 10−18,28.2,0.01,,"GOODS-S (0.02), GOODS-N (0.02)",Oesch+2023 ,,,TRUE,,,TRUE
+,JADES,JWST,NIRCam,"photometry, spectroscopy",,s,,0.05,,,,5.8 - 8, GOODS-S,Eisenstein+2025 ,,,TRUE,,,TRUE
+,JADES-shallow,JWST,,,,s,,0.004,,,,, GOODS-S,,,,TRUE,,,FALSE
+,JADES-medium,JWST,,,,s,,0.007,,,,, GOODS-S,,,,TRUE,,,FALSE
+,JADES-deep,JWST,,,,s,,0.005,,,,, GOODS-S,,,,TRUE,,,FALSE
+,PRIMER,JWST,NIRCam,photometry,UV,s,,0.1,complete to Muv ~ -18 for all the z range,,,9-13,"COSMOS, UDS",Donnan+2024,,,TRUE,,,FALSE
+,CEERS,JWST,"NIRCam, MIRI, NIRSpec","photometry, spectroscopy","UV, emission lines",s,cycle 1,0.03,,,,6-9,EGS,Finkelstein+2025,,,TRUE,,,FALSE
+,NGDEEP,JWST,"NIRCam, NIRISS","photometry, spectroscopy",,s,,0.001,"F_line = 1.2*10^-18, Muv =-17.5 at z=10",,,,HUDF (GOODS-S),Bagley+2023 ,,,TRUE,,,FALSE
+,COSMOS-Web,JWST,"NIRCam, MIRI",Photometry,UV,s,cycle 1,0.54,Muv depth of  –19.6 for z=7-8,,Δz=1,6 - 13 ,COSMOS,"Casey+2022 , Website ",,,TRUE,,,FALSE
+,COSMOS2025 (catalog),JWST (plus some ground based),"NIRCam, MIRI",Photometry,,,,0.54,,,0.1,,,Shuntov+2025 ,,,TRUE,,,FALSE
+,COSMOS-3D,JWST,NIRCam/WFSS,grism,[OIII],s,cycle 3,0.33,"2x shallower than fresco, 4000 galaxies above z=5, 800 galaxies between 7 and 9.",,,6.75-9.05,COSMOS,"Proposal (Kakiichi+2024) , Mayer+2025 , Webpage ,https://jwst-cosmos3d.github.io/ ",,,TRUE,,,FALSE
+,CAPERS,JWST,NIRSpec,slit spectroscopy,,s,cycle 3,~ 0.2,,28,,,CANDELS,Dickinson+; https://arxiv.org/pdf/2507.10518; https://arxiv.org/pdf/2504.12504,,,TRUE,,,FALSE
+,,,,,,,,,,,,,,,,,TRUE,,,FALSE
+,Subaru,,,,,,,,,,,,,,,,TRUE,,,
+,HSC-SSP,Subaru,,Narrow-band,Lya,g,,,,,,,,,,,TRUE,,,
+,CHORUS,Subaru,,Narrow-band,Lya,g,,,,,,,,,,,TRUE,,,
+,SILVERRUSH,Subaru,,Narrow-band,Lya,g,,24,"20,000 LAEs/  ",26,0.05,2.2−7.3 ,,Umeda+2024,,,TRUE,,,
+,PFS-SSP,Subaru,,Narrow-band,Lya,g,,15,,,,5.7-6.6,,Greene+2022 ,,,TRUE,,,
+,SUBARU ULTRA-DEEP,Subaru,,Narrow-band,Lya,g,,, L = 2.4 * 10^42 ,,,7.3,,Konno+2014 ,,,TRUE,,,
+,,,,,,,,,,,,,,,,,TRUE,,,
+,VLT - ELT,,,,,,,,,,,,,,,,TRUE,,,
+,MUSE-deep,VLT,,IFU,Lya,g,,,F = 2*10^-18,,,,,,,,TRUE,,,
+,MUSE-wide,VLT,,IFU,Lya,g,,0.006,F = 2.5*10^-19,,,<6,,Urrutia+2028 ,,,TRUE,,,
+,MUSE (MXDF),VLT,,IFU,Lya,,,,,,, 2.8 − 6.6 ,,Vitte+2024 ,,,TRUE,,,
 ,MOONRISE,VLT,,,"Lya, NV, HeII, CIV, CIII]",g,,1.2,"""a 
-few thousand"" galaxies in the EoR (z ~ 6-8)",26,0.001,>5,COSMOS,Maiolino+2020 ,,,,,
-,,ELT,MOSAIC,,Lya,g,Prospective,1 - 3,,26 - 28,0.001,>5,,,,,,,
-,,,,,,,,,,,,,,,,,,,
-,Roman,,,,,,,,,,,,,,,,,,
-,HLWAS,Roman,WFI,"grism, prism,  photometry","Lya, r,z, Y, J, H, F184",s,launching 2026-2027,16,,26.7,0.01, 6–10+,,"Bagley+2026 , Perez+2023 Roman OTAC Wang+2022 Wold+2023   ",,,,,
-,GRACE,Roman,WFI,grism spectroscopy,"Lya, Y106, J129, H158, F184",s,cycle 1,1.5,"5-sigma emission-line sensitivity of 10^-17 erg/cm^2/s, L~10^42.8 erg/s",27.1-27.9 (5-sigma),0.002,7-10,CDFS,Proposal (Malhotra+ 2026),,,,,
-,HST,,,,,,,,,,,,,,,,,,
-,"GOODS-South, UDS, COSMOS",HST, Wide Field Camera 3,photometry,,s,2011,2-3,F=3*10^-18,,,6-7,CANDELS,Pentericci+2018,,,,,
-,HUDF,HST,,photometry,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,
-,Other,,,,,,,,,,,,,,,,,,
-,COSMOS,VISTA,,photometry,Lya,g,2019,1,,26,,~7,COSMOS,Thananusak+2019,,,,,
-,,SKA,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,
-,Simulations,,,,,,,,,,,,,,,,,,
-,TILING,21cmFAST,,,,,,3.5,"Muv_cut =-18, Total number of galaxies ~ 45,000",,,7-8,,Triantafyllou+2026,,,,,
+few thousand"" galaxies in the EoR (z ~ 6-8)",26,0.001,>5,COSMOS,Maiolino+2020 ,,,TRUE,,,
+,,ELT,MOSAIC,,Lya,g,Prospective,1 - 3,,26 - 28,0.001,>5,,,,,TRUE,,,
+,,,,,,,,,,,,,,,,,TRUE,,,
+,Roman,,,,,,,,,,,,,,,,TRUE,,,
+,HLWAS,Roman,WFI,"grism, prism,  photometry","Lya, r,z, Y, J, H, F184",s,launching 2026-2027,16,,26.7,0.01, 6–10+,,"Bagley+2026 , Perez+2023 Roman OTAC Wang+2022 Wold+2023   ",,,TRUE,,,
+,GRACE,Roman,WFI,grism spectroscopy,"Lya, Y106, J129, H158, F184",s,cycle 1,1.5,"5-sigma emission-line sensitivity of 10^-17 erg/cm^2/s, L~10^42.8 erg/s",27.1-27.9 (5-sigma),0.002,7-10,CDFS,Proposal (Malhotra+ 2026),,,TRUE,,,
+,HST,,,,,,,,,,,,,,,,TRUE,,,
+,"GOODS-South, UDS, COSMOS",HST, Wide Field Camera 3,photometry,,s,2011,2-3,F=3*10^-18,,,6-7,CANDELS,Pentericci+2018,,,TRUE,,,
+,HUDF,HST,,photometry,,,,,,,,,,,,,TRUE,,,
+,,,,,,,,,,,,,,,,,TRUE,,,
+,Other,,,,,,,,,,,,,,,,TRUE,,,
+,COSMOS,VISTA,,photometry,Lya,g,2019,1,,26,,~7,COSMOS,Thananusak+2019,,,TRUE,,,
+,,SKA,,,,,,,,,,,,,,,TRUE,,,
+,,,,,,,,,,,,,,,,,TRUE,,,
+,Simulations,,,,,,,,,,,,,,,,TRUE,,,
+,TILING,21cmFAST,,,,,,3.5,"Muv_cut =-18, Total number of galaxies ~ 45,000",,,7-8,,Triantafyllou+2026,,,TRUE,,,
