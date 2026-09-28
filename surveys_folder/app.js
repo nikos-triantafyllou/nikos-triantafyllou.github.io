@@ -139,7 +139,8 @@ function autoShapesFromField(fieldStr, totalArea) {
 }
 
 // Robust CSV parser: quoted fields, embedded commas/newlines, "" escapes.
-function parseCSV(text) {
+function parseCSV(text, delimiter) {
+  delimiter = delimiter || ",";
   const rows = [];
   let row = [], field = "", inQuotes = false;
   let i = 0;
@@ -154,7 +155,7 @@ function parseCSV(text) {
       field += c; i++; continue;
     } else {
       if (c === '"') { inQuotes = true; i++; continue; }
-      if (c === ',') { row.push(field); field = ""; i++; continue; }
+      if (c === delimiter) { row.push(field); field = ""; i++; continue; }
       if (c === '\r') { i++; continue; }
       if (c === '\n') { row.push(field); rows.push(row); row = []; field = ""; i++; continue; }
       field += c; i++; continue;
@@ -164,8 +165,18 @@ function parseCSV(text) {
   return rows;
 }
 
+// Auto-detects whether the file is actually tab-separated (e.g. saved
+// straight from a copy-paste instead of a real "Download as CSV" export) so
+// that case still works instead of silently producing garbage: a real CSV
+// export never has a literal tab in its header line, whereas a tab-paste
+// almost always does.
+function detectDelimiter(text) {
+  const firstLine = text.split("\n")[0] || "";
+  return firstLine.includes("\t") ? "\t" : ",";
+}
+
 function loadCsvRows(csvText) {
-  const rows = parseCSV(csvText);
+  const rows = parseCSV(csvText, detectDelimiter(csvText));
   if (rows.length === 0) return [];
 
   // Find the real header row by looking for the show_on_map column, rather
