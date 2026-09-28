@@ -169,6 +169,38 @@ function loadCsvRows(csvText) {
   return records;
 }
 
+// ---- redshift range parsing ("5.8 - 8", ">5", "~7", "6–10+", "<6", "7.3") ----
+const MAX_Z = 15; // slider ceiling; open-ended ranges (">5", trailing "+") are capped here
+
+function parseZRange(str) {
+  if (!str) return null;
+  let s = str.trim();
+  if (!s) return null;
+  // normalize en/em dashes and the unicode minus sign to a plain hyphen
+  s = s.replace(/[\u2010-\u2015\u2212]/g, "-");
+
+  let m = s.match(/^[zZ]?\s*>=?\s*([\d.]+)/);
+  if (m) return { zmin: parseFloat(m[1]), zmax: MAX_Z };
+
+  m = s.match(/^[zZ]?\s*<=?\s*([\d.]+)/);
+  if (m) return { zmin: 0, zmax: parseFloat(m[1]) };
+
+  m = s.match(/([\d.]+)\s*-\s*([\d.]+)(\s*\+)?/);
+  if (m) {
+    const zmin = parseFloat(m[1]);
+    const zmax = m[3] ? MAX_Z : parseFloat(m[2]);
+    return { zmin, zmax };
+  }
+
+  m = s.match(/^~?\s*([\d.]+)(\+)?$/);
+  if (m) {
+    const v = parseFloat(m[1]);
+    return m[2] ? { zmin: v, zmax: MAX_Z } : { zmin: v, zmax: v };
+  }
+
+  return null; // unrecognized format — treated as "no redshift info" (always shown)
+}
+
 function buildSurveysFromCsvRecords(records) {
   const surveysJson = {};
   for (const rec of records) {
@@ -199,6 +231,7 @@ function buildSurveysFromCsvRecords(records) {
     surveysJson[name] = { shapes };
     if (rec.color) surveysJson[name].color = rec.color;
     surveysJson[name].default_visible = rec.default_visible ? parseBool(rec.default_visible) : true;
+    surveysJson[name].zRange = parseZRange(rec.z_range || "");
   }
   return surveysJson;
 }
@@ -267,11 +300,13 @@ async function main() {
   const groupTraceIndices = {}; // survey name -> [trace indices into overlayTraces]
   const startVisible = {};      // survey name -> boolean (checkbox starts checked?)
   const resolvedColors = {};    // survey name -> the color actually used (for the sidebar swatch)
+  const zRanges = {};           // survey name -> {zmin, zmax} | null (no redshift info)
 
   for (const [name, group] of Object.entries(surveys)) {
     groupTraceIndices[name] = [];
     const color = group.color || SURVEY_COLORS[name] || nextAutoColor();
     resolvedColors[name] = color;
+    zRanges[name] = group.zRange || null;
     const visible = group.default_visible !== undefined
       ? group.default_visible
       : !DEFAULT_OFF.has(name);
@@ -324,7 +359,29 @@ async function main() {
 
   await Plotly.newPlot('plot', data, layout, config);
 
-  buildSidebar(groupTraceIndices, resolvedColors, startVisible);
+  // Combined visibility = checkbox state AND redshift-filter match. Surveys
+  // with no parseable z range are always considered a match (unaffected by
+  // the slider) since we have nothing to filter them by.
+  const checkedState = Object.assign({}, startVisible);
+  const zSel = { lo: 0, hi: MAX_Z, includeUnranged: true };
+
+  function zMatches(name) {
+    const r = zRanges[name];
+    if (!r) return zSel.includeUnranged;
+    return r.zmin <= zSel.hi && r.zmax >= zSel.lo;
+  }
+
+  function applyVisibility(name) {
+    const visible = checkedState[name] && zMatches(name);
+    Plotly.restyle('plot', { visible: visible ? true : 'legendonly' }, groupTraceIndices[name]);
+  }
+
+  function applyAllVisibility() {
+    Object.keys(groupTraceIndices).forEach(applyVisibility);
+  }
+
+  buildSidebar(groupTraceIndices, resolvedColors, checkedState, applyVisibility);
+  setupZFilter(zSel, applyAllVisibility);
 }
 
 function hslToHex(h, s, l) {
@@ -353,7 +410,7 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-function buildSidebar(groupTraceIndices, resolvedColors, startVisible) {
+function buildSidebar(groupTraceIndices, resolvedColors, checkedState, applyVisibility) {
   const list = document.getElementById('survey-list');
   const names = Object.keys(groupTraceIndices);
 
@@ -363,10 +420,10 @@ function buildSidebar(groupTraceIndices, resolvedColors, startVisible) {
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
-    checkbox.checked = startVisible[name];
+    checkbox.checked = checkedState[name];
     checkbox.addEventListener('change', () => {
-      const indices = groupTraceIndices[name];
-      Plotly.restyle('plot', { visible: checkbox.checked ? true : 'legendonly' }, indices);
+      checkedState[name] = checkbox.checked;
+      applyVisibility(name);
     });
 
     const swatch = document.createElement('span');
@@ -392,6 +449,83 @@ function buildSidebar(groupTraceIndices, resolvedColors, startVisible) {
       if (cb.checked) { cb.checked = false; cb.dispatchEvent(new Event('change')); }
     });
   });
+}
+
+// ---- redshift slider: two overlapping <input type=range> elements acting
+// as a dual-handle slider. Dragging both handles to the same value selects
+// an exact redshift; spreading them selects a range. ----
+function setupZFilter(zSel, applyAllVisibility) {
+  const minInput = document.getElementById('z-min');
+  const maxInput = document.getElementById('z-max');
+  const fill = document.getElementById('zslider-fill');
+  const readout = document.getElementById('zfilter-readout');
+  const resetBtn = document.getElementById('btn-zreset');
+  const unrangedBtn = document.getElementById('btn-toggle-unranged');
+  if (!minInput || !maxInput) return; // markup not present; skip silently
+
+  minInput.min = maxInput.min = 0;
+  minInput.max = maxInput.max = MAX_Z;
+  minInput.step = maxInput.step = 0.1;
+  minInput.value = zSel.lo;
+  maxInput.value = zSel.hi;
+
+  function renderUnrangedBtn() {
+    if (!unrangedBtn) return;
+    unrangedBtn.classList.toggle('active', zSel.includeUnranged);
+    unrangedBtn.setAttribute('aria-pressed', String(zSel.includeUnranged));
+    unrangedBtn.textContent = zSel.includeUnranged ? 'Unranged: shown' : 'Unranged: hidden';
+  }
+
+  function render() {
+    const pctLo = (zSel.lo / MAX_Z) * 100;
+    const pctHi = (zSel.hi / MAX_Z) * 100;
+    fill.style.left = pctLo + '%';
+    fill.style.width = Math.max(pctHi - pctLo, 0) + '%';
+
+    if (zSel.lo <= 0 && zSel.hi >= MAX_Z) {
+      readout.textContent = `z: all (${MAX_Z.toFixed(0)}+ open)`;
+    } else if (Math.abs(zSel.lo - zSel.hi) < 0.05) {
+      readout.textContent = `z ≈ ${zSel.lo.toFixed(1)}`;
+    } else {
+      const hiLabel = zSel.hi >= MAX_Z ? `${MAX_Z.toFixed(0)}+` : zSel.hi.toFixed(1);
+      readout.textContent = `z: ${zSel.lo.toFixed(1)} – ${hiLabel}`;
+    }
+  }
+
+  minInput.addEventListener('input', () => {
+    let v = parseFloat(minInput.value);
+    if (v > zSel.hi) { zSel.hi = v; maxInput.value = v; }
+    zSel.lo = v;
+    render();
+    applyAllVisibility();
+  });
+
+  maxInput.addEventListener('input', () => {
+    let v = parseFloat(maxInput.value);
+    if (v < zSel.lo) { zSel.lo = v; minInput.value = v; }
+    zSel.hi = v;
+    render();
+    applyAllVisibility();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    zSel.lo = 0; zSel.hi = MAX_Z; zSel.includeUnranged = true;
+    minInput.value = 0; maxInput.value = MAX_Z;
+    render();
+    renderUnrangedBtn();
+    applyAllVisibility();
+  });
+
+  if (unrangedBtn) {
+    unrangedBtn.addEventListener('click', () => {
+      zSel.includeUnranged = !zSel.includeUnranged;
+      renderUnrangedBtn();
+      applyAllVisibility();
+    });
+  }
+
+  render();
+  renderUnrangedBtn();
 }
 
 main().catch(err => {
