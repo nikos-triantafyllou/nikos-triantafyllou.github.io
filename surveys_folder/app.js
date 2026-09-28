@@ -263,22 +263,16 @@ function buildSurveysFromCsvRecords(records) {
     if (!name || !telescope) continue; // section-divider or blank row
     if (!parseBool(rec.show_on_map)) continue;
 
-    let shapes = null;
     const override = rec.points_override || "";
-    if (override) {
-      try { shapes = parsePointsOverrideMulti(override); }
-      catch (e) { console.warn(`${name}: bad points_override`, e); }
+    if (!override) {
+      console.warn(`${name}: flagged show_on_map but no points_override given — skipping (no auto-placement fallback)`);
+      continue;
     }
-    if (shapes === null) {
-      let area = null;
-      if (rec.area_sqdeg) {
-        const cleaned = rec.area_sqdeg.replace(/[^\d.]/g, "");
-        area = cleaned ? parseFloat(cleaned) : null;
-      }
-      shapes = autoShapesFromField(rec.field || "", area);
-    }
+    let shapes = null;
+    try { shapes = parsePointsOverrideMulti(override); }
+    catch (e) { console.warn(`${name}: bad points_override`, e); }
     if (!shapes) {
-      console.warn(`${name}: flagged show_on_map but no recognized field+area or points_override — skipping`);
+      console.warn(`${name}: flagged show_on_map but points_override couldn't be parsed — skipping`);
       continue;
     }
 
