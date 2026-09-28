@@ -418,9 +418,6 @@ async function main() {
       gridcolor: '#22242c',
       zerolinecolor: '#22242c',
       tickfont: { size: 12 },
-      scaleanchor: 'y',
-      scaleratio: 15, // 1 hour of RA == 15° of Dec on screen, so zooming preserves true sky proportions
-      constrain: 'domain',
     },
     yaxis: {
       title: { text: 'Declination [deg]', font: { size: 15 } },
@@ -428,46 +425,13 @@ async function main() {
       gridcolor: '#22242c',
       zerolinecolor: '#22242c',
       tickfont: { size: 12 },
-      constrain: 'domain',
     },
     showlegend: false,
   };
 
   const config = { responsive: true, displaylogo: false };
 
-  // Size the #plot box itself so the locked 15:1 RA:Dec scale fills it with
-  // no blank margin in either direction. CSS aspect-ratio can't do this
-  // accurately because Plotly's margins + colorbar are fixed pixel amounts,
-  // not a fraction of the box — so a purely CSS-based ratio is only exactly
-  // right at one specific box width. This measures those fixed overheads
-  // directly (empirically, from this exact layout) and solves for the
-  // container height that makes the inner plotting area itself hit the
-  // correct ratio, at whatever width the container actually renders at.
-  const H_OVERHEAD = 166; // left/right margins (60+20) + colorbar (~86)
-  const V_OVERHEAD = 73;  // top/bottom margins (18+55)
-  const RATIO = 360 / 65; // 24h * 15 deg/h : 65 deg — the locked scale
-
-  function fitPlotBox() {
-    const el = document.getElementById('plot');
-    const outerWidth = el.clientWidth;
-    const innerWidth = Math.max(outerWidth - H_OVERHEAD, 100);
-    const innerHeight = innerWidth / RATIO;
-    const outerHeight = innerHeight + V_OVERHEAD;
-    const capped = Math.min(Math.max(outerHeight, 220), window.innerHeight * 0.74);
-    el.style.height = capped + 'px';
-  }
-
-  fitPlotBox();
   await Plotly.newPlot('plot', data, layout, config);
-
-  let resizeTimer = null;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      fitPlotBox();
-      Plotly.Plots.resize('plot');
-    }, 120);
-  });
 
   // Combined visibility = checkbox state AND redshift-filter match. Surveys
   // with no parseable z range are always considered a match (unaffected by
