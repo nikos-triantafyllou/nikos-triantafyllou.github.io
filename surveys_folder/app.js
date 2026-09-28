@@ -372,6 +372,7 @@ async function main() {
   const resolvedColors = {};    // survey name -> the color actually used (for the sidebar swatch)
   const zRanges = {};           // survey name -> {zmin, zmax} | null (no redshift info)
   const metaByName = {};        // survey name -> full metadata row (for the hover-info picker)
+  const traceGeometry = [];     // parallel to overlayTraces: {area, x, y} for hover-priority picking
   let hoverSelected = new Set(); // currently checked metadata fields (shared across all surveys)
 
   for (const [name, group] of Object.entries(surveys)) {
@@ -401,6 +402,7 @@ async function main() {
         hoverinfo: 'text',
         visible: visible ? true : 'legendonly',
       });
+      traceGeometry.push({ area: polygonArea(shape.x, shape.y), x: shape.x, y: shape.y });
       groupTraceIndices[name].push(overlayTraces.length - 1 + 1); // +1: heatmap occupies index 0
     });
   }
@@ -432,6 +434,39 @@ async function main() {
   const config = { responsive: true, displaylogo: false };
 
   await Plotly.newPlot('plot', data, layout, config);
+
+  // When footprints overlap (a small deep field nested inside a larger
+  // shallow one), always prefer showing the smallest one that actually
+  // contains the cursor, rather than whichever trace Plotly's own
+  // closest-point hit-testing happens to pick.
+  const plotEl = document.getElementById('plot');
+  plotEl.on('plotly_hover', (ev) => {
+    if (!ev.points || ev.points.length === 0) return;
+    const p = ev.points[0];
+    const fl = plotEl._fullLayout;
+    const xa = fl.xaxis, ya = fl.yaxis;
+    const rect = plotEl.getBoundingClientRect();
+    const clientX = ev.event ? ev.event.clientX : null;
+    const clientY = ev.event ? ev.event.clientY : null;
+    if (clientX === null) return;
+    const xPixel = clientX - rect.left - xa._offset;
+    const yPixel = clientY - rect.top - ya._offset;
+    const x = xa.range[0] + (xPixel / xa._length) * (xa.range[1] - xa.range[0]);
+    const y = ya.range[1] - (yPixel / ya._length) * (ya.range[1] - ya.range[0]);
+    let bestIdx = -1, bestArea = Infinity;
+    traceGeometry.forEach((tg, i) => {
+      const curveNumber = i + 1; // +1: heatmap occupies index 0
+      const traceVisible = plotEl.data[curveNumber].visible;
+      if (traceVisible !== true) return; // skip hidden/legendonly traces
+      if (pointInPolygon(x, y, tg.x, tg.y) && tg.area < bestArea) {
+        bestArea = tg.area;
+        bestIdx = curveNumber;
+      }
+    });
+    if (bestIdx !== -1 && bestIdx !== p.curveNumber) {
+      Plotly.Fx.hover('plot', [{ curveNumber: bestIdx, pointNumber: 0 }]);
+    }
+  });
 
   // Combined visibility = checkbox state AND redshift-filter match. Surveys
   // with no parseable z range are always considered a match (unaffected by
@@ -491,6 +526,32 @@ function nextAutoColor() {
   const hue = (200 + autoColorCount * 137.508) % 360;
   autoColorCount++;
   return hslToHex(hue, 75, 62);
+}
+
+// Shoelace formula: true area of a polygon in data-space (RA-hours x Dec-deg
+// units; not physically equal-area, but consistent enough to rank shapes by
+// size for the hover-priority logic below).
+function polygonArea(xs, ys) {
+  let area = 0;
+  const n = xs.length;
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n;
+    area += xs[i] * ys[j] - xs[j] * ys[i];
+  }
+  return Math.abs(area) / 2;
+}
+
+// Ray-casting point-in-polygon test.
+function pointInPolygon(x, y, xs, ys) {
+  let inside = false;
+  for (let i = 0, j = xs.length - 1; i < xs.length; j = i++) {
+    const xi = xs[i], yi = ys[i];
+    const xj = xs[j], yj = ys[j];
+    const intersect = ((yi > y) !== (yj > y)) &&
+      (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
 }
 
 function hexToRgba(hex, alpha) {
