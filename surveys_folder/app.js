@@ -344,6 +344,9 @@ async function main() {
       gridcolor: '#22242c',
       zerolinecolor: '#22242c',
       tickfont: { size: 12 },
+      scaleanchor: 'y',
+      scaleratio: 15, // 1 hour of RA == 15° of Dec on screen, so zooming preserves true sky proportions
+      constrain: 'domain',
     },
     yaxis: {
       title: { text: 'Declination [deg]', font: { size: 15 } },
