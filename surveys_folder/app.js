@@ -706,15 +706,25 @@ function buildSidebar(groupTraceIndices, resolvedColors, categoryByName, checked
     if (target) target.appendChild(makeRow(name));
   });
 
-  document.getElementById('btn-all').addEventListener('click', () => {
-    document.querySelectorAll('#survey-list input[type=checkbox], #field-list input[type=checkbox]').forEach(cb => {
-      if (!cb.checked) { cb.checked = true; cb.dispatchEvent(new Event('change')); }
+  function setAllChecked(selector, checked) {
+    document.querySelectorAll(selector).forEach(cb => {
+      if (cb.checked !== checked) { cb.checked = checked; cb.dispatchEvent(new Event('change')); }
     });
+  }
+
+  document.getElementById('btn-all').addEventListener('click', () => {
+    setAllChecked('#survey-list input[type=checkbox], #field-list input[type=checkbox]', true);
   });
   document.getElementById('btn-none').addEventListener('click', () => {
-    document.querySelectorAll('#survey-list input[type=checkbox], #field-list input[type=checkbox]').forEach(cb => {
-      if (cb.checked) { cb.checked = false; cb.dispatchEvent(new Event('change')); }
-    });
+    setAllChecked('#survey-list input[type=checkbox], #field-list input[type=checkbox]', false);
+  });
+  document.getElementById('btn-surveys-only').addEventListener('click', () => {
+    setAllChecked('#survey-list input[type=checkbox]', true);
+    setAllChecked('#field-list input[type=checkbox]', false);
+  });
+  document.getElementById('btn-fields-only').addEventListener('click', () => {
+    setAllChecked('#field-list input[type=checkbox]', true);
+    setAllChecked('#survey-list input[type=checkbox]', false);
   });
 }
 
