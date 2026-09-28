@@ -225,15 +225,13 @@ function reshape(flat, ny, nx) {
 }
 
 async function main() {
-  const [axes, staticSurveys, csvSurveys] = await Promise.all([
+  const [axes, csvSurveys] = await Promise.all([
     fetch('surveys_folder/data/axes.json').then(r => r.json()),
-    fetch('surveys_folder/data/surveys.json').then(r => r.json()),
     loadCsvSurveys('surveys_folder/data/surveys_for_eor.csv'),
   ]);
 
-  // CSV-derived entries are added alongside the hand-authored ones; a name
-  // that appears in both is overridden by the CSV version.
-  const surveys = Object.assign({}, staticSurveys, csvSurveys);
+  // The CSV is the only source: only rows flagged show_on_map=TRUE appear.
+  const surveys = csvSurveys;
 
   const flat = await loadBinaryFloat32('surveys_folder/data/gsm_150MHz.bin', axes.nx * axes.ny);
   const z = reshape(flat, axes.ny, axes.nx);
@@ -371,5 +369,5 @@ function buildSidebar(groupTraceIndices, surveys, startVisible) {
 main().catch(err => {
   console.error(err);
   document.getElementById('plot').innerHTML =
-    '<p style="color:#ff8a3d;font-family:monospace;padding:20px;">Failed to load data — check the browser console and confirm surveys_folder/data/gsm_150MHz.bin, surveys_folder/data/axes.json and surveys_folder/data/surveys.json are present relative to surveys.html.</p>';
+    '<p style="color:#ff8a3d;font-family:monospace;padding:20px;">Failed to load data — check the browser console and confirm surveys_folder/data/gsm_150MHz.bin and surveys_folder/data/axes.json are present relative to surveys.html.</p>';
 });
