@@ -410,6 +410,7 @@ async function main() {
       gridcolor: '#22242c',
       zerolinecolor: '#22242c',
       tickfont: { size: 12 },
+      constrain: 'domain',
     },
     showlegend: false,
   };
@@ -446,9 +447,17 @@ async function main() {
     });
   }
 
-  buildSidebar(groupTraceIndices, resolvedColors, checkedState, applyVisibility);
-  setupZFilter(zSel, applyAllVisibility);
-  buildHoverFieldsUI(hoverSelected, updateHoverTexts);
+  // Each panel is set up independently: a bug in one (or a browser that's
+  // still running a stale cached copy of part of this file) shouldn't take
+  // down the others.
+  try { buildSidebar(groupTraceIndices, resolvedColors, checkedState, applyVisibility); }
+  catch (e) { console.error('Sidebar checkbox list failed to build:', e); }
+
+  try { setupZFilter(zSel, applyAllVisibility); }
+  catch (e) { console.error('Redshift filter failed to build:', e); }
+
+  try { buildHoverFieldsUI(hoverSelected, updateHoverTexts); }
+  catch (e) { console.error('Hover-info dropdown failed to build:', e); }
 }
 
 function hslToHex(h, s, l) {
