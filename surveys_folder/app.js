@@ -257,26 +257,77 @@ function buildHoverText(name, selectedKeys, meta) {
 
 function buildSurveysFromCsvRecords(records) {
   const surveysJson = {};
-  for (const rec of records) {
-    const name = rec.name || "";
-    const telescope = rec.telescope || "";
-    if (!name || !telescope) continue; // section-divider or blank row
-    if (!parseBool(rec.show_on_map)) continue;
 
+  // Tag each record with the section it falls under (the most recent
+  // section-divider row above it, e.g. "JWST", "Subaru", "Fields") so we can
+  // tell field-definition rows apart from ordinary survey rows.
+  let currentSection = "";
+  const tagged = records.map(rec => {
+    const name = (rec.name || "").trim();
+    const telescope = (rec.telescope || "").trim();
+    const isDivider = !!name && !telescope;
+    if (isDivider) currentSection = name;
+    return { rec, isDivider, section: currentSection };
+  });
+
+  const FIELDS_SECTION_RE = /^fields?$/i;
+
+  // Pass 1: collect each field row's own shape, keyed by its name, so survey
+  // rows can borrow it regardless of where in the sheet they sit.
+  const fieldShapesByName = {};
+  tagged.forEach(({ rec, isDivider, section }) => {
+    if (isDivider || !FIELDS_SECTION_RE.test(section.trim())) return;
+    const name = (rec.name || "").trim();
+    const telescope = (rec.telescope || "").trim();
+    if (!name || !telescope) return;
     const override = rec.points_override || "";
-    if (!override) {
-      console.warn(`${name}: flagged show_on_map but no points_override given — skipping (no auto-placement fallback)`);
-      continue;
+    if (!override) return; // field row with no shape of its own; nothing to borrow
+    try {
+      fieldShapesByName[name.toLowerCase()] = parsePointsOverrideMulti(override);
+    } catch (e) {
+      console.warn(`Field "${name}": bad points_override`, e);
     }
+  });
+
+  // Pass 2: build every plotted entry — surveys and field rows alike, tagged
+  // with which group they belong to for the sidebar.
+  tagged.forEach(({ rec, isDivider, section }) => {
+    if (isDivider) return;
+    const name = (rec.name || "").trim();
+    const telescope = (rec.telescope || "").trim();
+    if (!name || !telescope) return; // blank row
+    if (!parseBool(rec.show_on_map)) return;
+
+    const isField = FIELDS_SECTION_RE.test(section.trim());
+
     let shapes = null;
-    try { shapes = parsePointsOverrideMulti(override); }
-    catch (e) { console.warn(`${name}: bad points_override`, e); }
-    if (!shapes) {
-      console.warn(`${name}: flagged show_on_map but points_override couldn't be parsed — skipping`);
-      continue;
+    const override = rec.points_override || "";
+    if (override) {
+      try { shapes = parsePointsOverrideMulti(override); }
+      catch (e) { console.warn(`${name}: bad points_override`, e); }
     }
 
-    surveysJson[name] = { shapes };
+    if (!shapes && !isField) {
+      // No override on a survey row: borrow the shape(s) of whichever field
+      // row(s) its `field` column names (comma-separated; any "(...)" area
+      // annotation left over from the old auto-box scheme is ignored).
+      const fieldNames = (rec.field || "")
+        .split(",")
+        .map(s => s.replace(/\([^)]*\)/g, "").trim().toLowerCase())
+        .filter(Boolean);
+      const borrowed = [];
+      fieldNames.forEach(fn => {
+        if (fieldShapesByName[fn]) borrowed.push(...fieldShapesByName[fn]);
+      });
+      if (borrowed.length) shapes = borrowed;
+    }
+
+    if (!shapes) {
+      console.warn(`${name}: flagged show_on_map but has no points_override and no matching field shape — skipping`);
+      return;
+    }
+
+    surveysJson[name] = { shapes, category: isField ? "field" : "survey" };
     if (rec.color) surveysJson[name].color = rec.color;
     surveysJson[name].default_visible = rec.default_visible ? parseBool(rec.default_visible) : true;
     surveysJson[name].zRange = parseZRange(rec.z_range || "");
@@ -296,7 +347,7 @@ function buildSurveysFromCsvRecords(records) {
       field: rec.field || "",
       references: rec.references || "",
     };
-  }
+  });
   return surveysJson;
 }
 
@@ -364,6 +415,7 @@ async function main() {
   const groupTraceIndices = {}; // survey name -> [trace indices into overlayTraces]
   const startVisible = {};      // survey name -> boolean (checkbox starts checked?)
   const resolvedColors = {};    // survey name -> the color actually used (for the sidebar swatch)
+  const categoryByName = {};    // survey name -> "survey" | "field" (for the sidebar grouping)
   const zRanges = {};           // survey name -> {zmin, zmax} | null (no redshift info)
   const metaByName = {};        // survey name -> full metadata row (for the hover-info picker)
   const traceGeometry = [];     // parallel to overlayTraces: {area, x, y} for hover-priority picking
@@ -373,6 +425,7 @@ async function main() {
     groupTraceIndices[name] = [];
     const color = group.color || SURVEY_COLORS[name] || nextAutoColor();
     resolvedColors[name] = color;
+    categoryByName[name] = group.category === "field" ? "field" : "survey";
     zRanges[name] = group.zRange || null;
     metaByName[name] = group.meta || {};
     const visible = group.default_visible !== undefined
@@ -493,7 +546,7 @@ async function main() {
   // Each panel is set up independently: a bug in one (or a browser that's
   // still running a stale cached copy of part of this file) shouldn't take
   // down the others.
-  try { buildSidebar(groupTraceIndices, resolvedColors, checkedState, applyVisibility); }
+  try { buildSidebar(groupTraceIndices, resolvedColors, categoryByName, checkedState, applyVisibility); }
   catch (e) { console.error('Sidebar checkbox list failed to build:', e); }
 
   try { setupZFilter(zSel, applyAllVisibility); }
@@ -607,11 +660,12 @@ function buildHoverFieldsUI(hoverSelected, updateHoverTexts) {
   updateCount();
 }
 
-function buildSidebar(groupTraceIndices, resolvedColors, checkedState, applyVisibility) {
-  const list = document.getElementById('survey-list');
+function buildSidebar(groupTraceIndices, resolvedColors, categoryByName, checkedState, applyVisibility) {
+  const surveyList = document.getElementById('survey-list');
+  const fieldList = document.getElementById('field-list');
   const names = Object.keys(groupTraceIndices);
 
-  names.forEach(name => {
+  function makeRow(name) {
     const row = document.createElement('label');
     row.className = 'survey-row';
 
@@ -633,16 +687,21 @@ function buildSidebar(groupTraceIndices, resolvedColors, checkedState, applyVisi
     row.appendChild(checkbox);
     row.appendChild(swatch);
     row.appendChild(label);
-    list.appendChild(row);
+    return row;
+  }
+
+  names.forEach(name => {
+    const target = categoryByName[name] === 'field' ? fieldList : surveyList;
+    if (target) target.appendChild(makeRow(name));
   });
 
   document.getElementById('btn-all').addEventListener('click', () => {
-    document.querySelectorAll('#survey-list input[type=checkbox]').forEach(cb => {
+    document.querySelectorAll('#survey-list input[type=checkbox], #field-list input[type=checkbox]').forEach(cb => {
       if (!cb.checked) { cb.checked = true; cb.dispatchEvent(new Event('change')); }
     });
   });
   document.getElementById('btn-none').addEventListener('click', () => {
-    document.querySelectorAll('#survey-list input[type=checkbox]').forEach(cb => {
+    document.querySelectorAll('#survey-list input[type=checkbox], #field-list input[type=checkbox]').forEach(cb => {
       if (cb.checked) { cb.checked = false; cb.dispatchEvent(new Event('change')); }
     });
   });
