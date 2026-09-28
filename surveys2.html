@@ -208,6 +208,47 @@
     margin-top: 22px;
     padding-top: 18px;
     border-top: 1px solid var(--line);
+    position: relative;
+  }
+  .dropdown-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+  }
+  .dropdown-toggle .caret {
+    color: var(--muted);
+    font-size: 0.7rem;
+  }
+  .dropdown-toggle.open {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  #hoverfields-count {
+    color: var(--accent);
+  }
+  .dropdown-panel {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    background: var(--panel2, #191b22);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 14px;
+    z-index: 20;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .dropdown-panel.open {
+    display: block;
   }
   .field-row {
     display: flex;
@@ -265,8 +306,8 @@
     </div>
 
     <div class="hoverfields">
-      <h2>hover info shows</h2>
-      <div id="hoverfield-list"></div>
+      <button id="hoverfields-toggle" class="dropdown-toggle">Hover info <span id="hoverfields-count"></span> <span class="caret">&#9662;</span></button>
+      <div id="hoverfield-list" class="dropdown-panel"></div>
     </div>
   </aside>
 
