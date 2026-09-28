@@ -1,0 +1,9 @@
+Survey,Telescope,Instrument,type,targeting line/ spectrum region/ filters,Space or ground,Year,~ Total area (in sq. deg),"Depth (L in erg/s, F in erg/s/cm^2)",AB limiting magnitude,z accuracy,z range,field,references,show_on_map,points_override,color,default_visible
+JWST,,,,,,,,,,,,,,,,,
+FRESCO,JWST,"NIRCam, grism",Grism + photometry,"[OIII], Ha, Hb",s,,0.04,complete to Muv-19 and -20 for z=6 and z=8 respect. F(Ha) = 2 * 10-18,28.2,0.01,,"GOODS-S (0.02), GOODS-N (0.02)",Oesch+2023,TRUE,,#ffd6a5,FALSE
+JADES,JWST,NIRCam,"photometry, spectroscopy",,s,,0.05,,,,5.8 - 8,GOODS-S,Eisenstein+2025,TRUE,,,TRUE
+COSMOS-Web,JWST,"NIRCam, MIRI",Photometry,UV,s,cycle 1,0.54,Muv depth of -19.6 for z=7-8,,dz=1,6 - 13,COSMOS,"Casey+2022 , Website",TRUE,,#63e6be,TRUE
+CAPERS,JWST,NIRSpec,slit spectroscopy,,s,cycle 3,~ 0.2,,28,,,CANDELS,Dickinson+,FALSE,,,
+Subaru,,,,,,,,,,,,,,,,,
+HSC-SSP,Subaru,,Narrow-band,Lya,g,,,,,,,,,FALSE,,,
+MOONRISE,VLT,,,"Lya, NV, HeII, CIV, CIII]",g,,1.2,"a few thousand galaxies in the EoR (z ~ 6-8)",26,0.001,>5,COSMOS,Maiolino+2020,TRUE,"9.6,1.9; 10.4,1.9; 10.4,2.5; 9.6,2.5",#ff6b81,TRUE
