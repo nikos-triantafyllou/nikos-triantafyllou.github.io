@@ -116,11 +116,12 @@
     padding: 18px 18px 0 18px;
     display: flex;
     flex-direction: column;
+    min-width: 0; /* prevent grid/flex blowout from Plotly's intrinsic SVG width */
   }
   #plot {
     width: 100%;
-    height: 74vh;
-    min-height: 460px;
+    min-height: 220px;
+    min-width: 0;
   }
   .note {
     font-family: 'IBM Plex Mono', monospace;
