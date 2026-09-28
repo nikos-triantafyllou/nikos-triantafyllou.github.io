@@ -64,6 +64,7 @@ function parseBool(val) {
   return ["TRUE", "YES", "Y", "1"].includes(String(val || "").trim().toUpperCase());
 }
 
+// One polygon's point list: "ra,dec; ra,dec; ..."
 function parsePointsOverride(val) {
   const pts = val.split(";").map(p => p.trim()).filter(Boolean);
   const xs = [], ys = [];
@@ -73,6 +74,23 @@ function parsePointsOverride(val) {
     ys.push(parseFloat(dec.trim()));
   }
   return { kind: "polygon", x: xs, y: ys };
+}
+
+// Multiple disjoint polygons in one cell:
+//   {[ra,dec; ra,dec; ...],[ra,dec; ra,dec; ...]}
+// Outer {} is optional; each polygon is bracketed with [...]. Also accepts a
+// single bare polygon with no brackets at all, for backward compatibility:
+//   ra,dec; ra,dec; ...
+function parsePointsOverrideMulti(val) {
+  val = val.trim();
+  if (val.startsWith("{") && val.endsWith("}")) {
+    val = val.slice(1, -1).trim();
+  }
+  const matches = [...val.matchAll(/\[([^\]]*)\]/g)];
+  if (matches.length === 0) {
+    return [parsePointsOverride(val)]; // bare polygon, no brackets
+  }
+  return matches.map(m => parsePointsOverride(m[1]));
 }
 
 function boxShape(raH, decDeg, areaSqDeg) {
@@ -248,7 +266,7 @@ function buildSurveysFromCsvRecords(records) {
     let shapes = null;
     const override = rec.points_override || "";
     if (override) {
-      try { shapes = [parsePointsOverride(override)]; }
+      try { shapes = parsePointsOverrideMulti(override); }
       catch (e) { console.warn(`${name}: bad points_override`, e); }
     }
     if (shapes === null) {
