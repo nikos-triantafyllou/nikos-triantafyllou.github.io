@@ -281,22 +281,22 @@ function buildSurveysFromCsvRecords(records) {
     return { rec, isDivider, section: currentSection };
   });
 
-  const FIELDS_SECTION_RE = /^fields?$/i;
+  const REFERENCE_SECTION_RE = /^reference[_\s]*footprints$/i;
 
-  // Pass 1: collect each field row's own shape, keyed by its name, so survey
-  // rows can borrow it regardless of where in the sheet they sit.
-  const fieldShapesByName = {};
+  // Pass 1: collect each reference row's own shape, keyed by its name, so
+  // survey rows can borrow it regardless of where in the sheet they sit.
+  const referenceShapesByName = {};
   tagged.forEach(({ rec, isDivider, section }) => {
-    if (isDivider || !FIELDS_SECTION_RE.test(section.trim())) return;
+    if (isDivider || !REFERENCE_SECTION_RE.test(section.trim())) return;
     const name = (rec.name || "").trim();
     const telescope = (rec.telescope || "").trim();
     if (!name || !telescope) return;
     const override = rec.points_override || "";
-    if (!override) return; // field row with no shape of its own; nothing to borrow
+    if (!override) return; // reference row with no shape of its own; nothing to borrow
     try {
-      fieldShapesByName[name.toLowerCase()] = parsePointsOverrideMulti(override);
+      referenceShapesByName[name.toLowerCase()] = parsePointsOverrideMulti(override);
     } catch (e) {
-      console.warn(`Field "${name}": bad points_override`, e);
+      console.warn(`Reference footprint "${name}": bad points_override`, e);
     }
   });
 
@@ -309,7 +309,7 @@ function buildSurveysFromCsvRecords(records) {
     if (!name || !telescope) return; // blank row
     if (!parseBool(rec.show_on_map)) return;
 
-    const isField = FIELDS_SECTION_RE.test(section.trim());
+    const isReference = REFERENCE_SECTION_RE.test(section.trim());
 
     let shapes = null;
     const override = rec.points_override || "";
@@ -318,27 +318,28 @@ function buildSurveysFromCsvRecords(records) {
       catch (e) { console.warn(`${name}: bad points_override`, e); }
     }
 
-    if (!shapes && !isField) {
-      // No override on a survey row: borrow the shape(s) of whichever field
-      // row(s) its `field` column names (comma-separated; any "(...)" area
-      // annotation left over from the old auto-box scheme is ignored).
+    if (!shapes && !isReference) {
+      // No override on a survey row: borrow the shape(s) of whichever
+      // reference-footprint row(s) its `field` column names (comma-separated;
+      // any "(...)" area annotation left over from the old auto-box scheme
+      // is ignored).
       const fieldNames = (rec.field || "")
         .split(",")
         .map(s => s.replace(/\([^)]*\)/g, "").trim().toLowerCase())
         .filter(Boolean);
       const borrowed = [];
       fieldNames.forEach(fn => {
-        if (fieldShapesByName[fn]) borrowed.push(...fieldShapesByName[fn]);
+        if (referenceShapesByName[fn]) borrowed.push(...referenceShapesByName[fn]);
       });
       if (borrowed.length) shapes = borrowed;
     }
 
     if (!shapes) {
-      console.warn(`${name}: flagged show_on_map but has no points_override and no matching field shape — skipping`);
+      console.warn(`${name}: flagged show_on_map but has no points_override and no matching reference-footprint shape — skipping`);
       return;
     }
 
-    surveysJson[name] = { shapes, category: isField ? "field" : "survey" };
+    surveysJson[name] = { shapes, category: isReference ? "reference" : "survey" };
     if (rec.color) surveysJson[name].color = rec.color;
     surveysJson[name].default_visible = rec.default_visible ? parseBool(rec.default_visible) : true;
     surveysJson[name].zRange = parseZRange(rec.z_range || "");
@@ -426,7 +427,7 @@ async function main() {
   const groupTraceIndices = {}; // survey name -> [trace indices into overlayTraces]
   const startVisible = {};      // survey name -> boolean (checkbox starts checked?)
   const resolvedColors = {};    // survey name -> the color actually used (for the sidebar swatch)
-  const categoryByName = {};    // survey name -> "survey" | "field" (for the sidebar grouping)
+  const categoryByName = {};    // survey name -> "survey" | "reference" (for the sidebar grouping)
   const zRanges = {};           // survey name -> {zmin, zmax} | null (no redshift info)
   const metaByName = {};        // survey name -> full metadata row (for the hover-info picker)
   const traceGeometry = [];     // parallel to overlayTraces: {area, x, y} for hover-priority picking
@@ -436,7 +437,7 @@ async function main() {
     groupTraceIndices[name] = [];
     const color = group.color || SURVEY_COLORS[name] || nextAutoColor();
     resolvedColors[name] = color;
-    categoryByName[name] = group.category === "field" ? "field" : "survey";
+    categoryByName[name] = group.category === "reference" ? "reference" : "survey";
     zRanges[name] = group.zRange || null;
     metaByName[name] = group.meta || {};
     const visible = group.default_visible !== undefined
@@ -458,6 +459,7 @@ async function main() {
         showlegend: false,
         text: buildHoverText(name, hoverSelected, group.meta),
         hoverinfo: 'text',
+        hoveron: 'fills', // hover anywhere inside the shape, not just near its outline
         visible: visible ? true : 'legendonly',
       });
       traceGeometry.push({ area: polygonArea(shape.x, shape.y), x: shape.x, y: shape.y });
@@ -673,7 +675,7 @@ function buildHoverFieldsUI(hoverSelected, updateHoverTexts) {
 
 function buildSidebar(groupTraceIndices, resolvedColors, categoryByName, checkedState, applyVisibility) {
   const surveyList = document.getElementById('survey-list');
-  const fieldList = document.getElementById('field-list');
+  const referenceList = document.getElementById('reference-list');
   const names = Object.keys(groupTraceIndices);
 
   function makeRow(name) {
@@ -702,7 +704,7 @@ function buildSidebar(groupTraceIndices, resolvedColors, categoryByName, checked
   }
 
   names.forEach(name => {
-    const target = categoryByName[name] === 'field' ? fieldList : surveyList;
+    const target = categoryByName[name] === 'reference' ? referenceList : surveyList;
     if (target) target.appendChild(makeRow(name));
   });
 
@@ -713,17 +715,17 @@ function buildSidebar(groupTraceIndices, resolvedColors, categoryByName, checked
   }
 
   document.getElementById('btn-all').addEventListener('click', () => {
-    setAllChecked('#survey-list input[type=checkbox], #field-list input[type=checkbox]', true);
+    setAllChecked('#survey-list input[type=checkbox], #reference-list input[type=checkbox]', true);
   });
   document.getElementById('btn-none').addEventListener('click', () => {
-    setAllChecked('#survey-list input[type=checkbox], #field-list input[type=checkbox]', false);
+    setAllChecked('#survey-list input[type=checkbox], #reference-list input[type=checkbox]', false);
   });
   document.getElementById('btn-surveys-only').addEventListener('click', () => {
     setAllChecked('#survey-list input[type=checkbox]', true);
-    setAllChecked('#field-list input[type=checkbox]', false);
+    setAllChecked('#reference-list input[type=checkbox]', false);
   });
-  document.getElementById('btn-fields-only').addEventListener('click', () => {
-    setAllChecked('#field-list input[type=checkbox]', true);
+  document.getElementById('btn-reference-only').addEventListener('click', () => {
+    setAllChecked('#reference-list input[type=checkbox]', true);
     setAllChecked('#survey-list input[type=checkbox]', false);
   });
 }
