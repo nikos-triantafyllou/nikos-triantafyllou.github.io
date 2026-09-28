@@ -201,6 +201,42 @@ function parseZRange(str) {
   return null; // unrecognized format — treated as "no redshift info" (always shown)
 }
 
+// Metadata columns available for the hover-info picker: key -> display label.
+// `key` matches the internal field name from HEADER_ALIASES.
+const METADATA_FIELDS = [
+  { key: "telescope", label: "Telescope" },
+  { key: "instrument", label: "Instrument" },
+  { key: "type", label: "Type" },
+  { key: "targeting", label: "Targeting" },
+  { key: "space_or_ground", label: "Space/ground" },
+  { key: "year", label: "Year" },
+  { key: "area_sqdeg", label: "Area (sq deg)" },
+  { key: "depth", label: "Depth" },
+  { key: "ab_limiting_magnitude", label: "AB limiting magnitude" },
+  { key: "z_accuracy", label: "z accuracy" },
+  { key: "z_range", label: "z range" },
+  { key: "field", label: "Field" },
+  { key: "references", label: "References" },
+];
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Builds the hover text for one survey from whichever metadata fields are
+// currently checked in the sidebar. Empty cells are skipped automatically.
+function buildHoverText(name, selectedKeys, meta) {
+  const lines = [`<b>${escapeHtml(name)}</b>`];
+  meta = meta || {};
+  METADATA_FIELDS.forEach(f => {
+    if (!selectedKeys.has(f.key)) return;
+    const val = (meta[f.key] || "").trim();
+    if (!val) return;
+    lines.push(`${f.label}: ${escapeHtml(val)}`);
+  });
+  return lines.join("<br>");
+}
+
 function buildSurveysFromCsvRecords(records) {
   const surveysJson = {};
   for (const rec of records) {
@@ -232,6 +268,22 @@ function buildSurveysFromCsvRecords(records) {
     if (rec.color) surveysJson[name].color = rec.color;
     surveysJson[name].default_visible = rec.default_visible ? parseBool(rec.default_visible) : true;
     surveysJson[name].zRange = parseZRange(rec.z_range || "");
+    // Full row, kept for the hover-info picker (minus the map-control columns).
+    surveysJson[name].meta = {
+      telescope: rec.telescope || "",
+      instrument: rec.instrument || "",
+      type: rec.type || "",
+      targeting: rec.targeting || "",
+      space_or_ground: rec.space_or_ground || "",
+      year: rec.year || "",
+      area_sqdeg: rec.area_sqdeg || "",
+      depth: rec.depth || "",
+      ab_limiting_magnitude: rec.ab_limiting_magnitude || "",
+      z_accuracy: rec.z_accuracy || "",
+      z_range: rec.z_range || "",
+      field: rec.field || "",
+      references: rec.references || "",
+    };
   }
   return surveysJson;
 }
@@ -301,12 +353,15 @@ async function main() {
   const startVisible = {};      // survey name -> boolean (checkbox starts checked?)
   const resolvedColors = {};    // survey name -> the color actually used (for the sidebar swatch)
   const zRanges = {};           // survey name -> {zmin, zmax} | null (no redshift info)
+  const metaByName = {};        // survey name -> full metadata row (for the hover-info picker)
+  let hoverSelected = new Set(); // currently checked metadata fields (shared across all surveys)
 
   for (const [name, group] of Object.entries(surveys)) {
     groupTraceIndices[name] = [];
     const color = group.color || SURVEY_COLORS[name] || nextAutoColor();
     resolvedColors[name] = color;
     zRanges[name] = group.zRange || null;
+    metaByName[name] = group.meta || {};
     const visible = group.default_visible !== undefined
       ? group.default_visible
       : !DEFAULT_OFF.has(name);
@@ -324,7 +379,8 @@ async function main() {
         name: name,
         legendgroup: name,
         showlegend: false,
-        hoverinfo: 'name',
+        text: buildHoverText(name, hoverSelected, group.meta),
+        hoverinfo: 'text',
         visible: visible ? true : 'legendonly',
       });
       groupTraceIndices[name].push(overlayTraces.length - 1 + 1); // +1: heatmap occupies index 0
@@ -383,8 +439,16 @@ async function main() {
     Object.keys(groupTraceIndices).forEach(applyVisibility);
   }
 
+  function updateHoverTexts() {
+    Object.keys(groupTraceIndices).forEach(name => {
+      const txt = buildHoverText(name, hoverSelected, metaByName[name]);
+      Plotly.restyle('plot', { text: txt, hoverinfo: 'text' }, groupTraceIndices[name]);
+    });
+  }
+
   buildSidebar(groupTraceIndices, resolvedColors, checkedState, applyVisibility);
   setupZFilter(zSel, applyAllVisibility);
+  buildHoverFieldsUI(hoverSelected, updateHoverTexts);
 }
 
 function hslToHex(h, s, l) {
@@ -411,6 +475,34 @@ function hexToRgba(hex, alpha) {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ---- hover-info field picker: checkboxes for which metadata columns show
+// up in the tooltip when hovering a footprint. ----
+function buildHoverFieldsUI(hoverSelected, updateHoverTexts) {
+  const list = document.getElementById('hoverfield-list');
+  if (!list) return;
+
+  METADATA_FIELDS.forEach(f => {
+    const row = document.createElement('label');
+    row.className = 'field-row';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = hoverSelected.has(f.key);
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) hoverSelected.add(f.key);
+      else hoverSelected.delete(f.key);
+      updateHoverTexts();
+    });
+
+    const label = document.createElement('span');
+    label.textContent = f.label;
+
+    row.appendChild(checkbox);
+    row.appendChild(label);
+    list.appendChild(row);
+  });
 }
 
 function buildSidebar(groupTraceIndices, resolvedColors, checkedState, applyVisibility) {
