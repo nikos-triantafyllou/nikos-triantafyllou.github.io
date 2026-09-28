@@ -266,10 +266,12 @@ async function main() {
   const overlayTraces = [];
   const groupTraceIndices = {}; // survey name -> [trace indices into overlayTraces]
   const startVisible = {};      // survey name -> boolean (checkbox starts checked?)
+  const resolvedColors = {};    // survey name -> the color actually used (for the sidebar swatch)
 
   for (const [name, group] of Object.entries(surveys)) {
     groupTraceIndices[name] = [];
-    const color = group.color || SURVEY_COLORS[name] || '#ffffff';
+    const color = group.color || SURVEY_COLORS[name] || nextAutoColor();
+    resolvedColors[name] = color;
     const visible = group.default_visible !== undefined
       ? group.default_visible
       : !DEFAULT_OFF.has(name);
@@ -322,7 +324,26 @@ async function main() {
 
   await Plotly.newPlot('plot', data, layout, config);
 
-  buildSidebar(groupTraceIndices, surveys, startVisible);
+  buildSidebar(groupTraceIndices, resolvedColors, startVisible);
+}
+
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const toHex = x => Math.round(255 * x).toString(16).padStart(2, '0');
+  return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+}
+
+// Auto-assigns well-separated colors (golden-angle hue stepping, biased
+// toward cool hues so they read clearly against the warm 'Hot' background
+// colormap) to any survey that doesn't set its own `color` in the sheet.
+let autoColorCount = 0;
+function nextAutoColor() {
+  const hue = (200 + autoColorCount * 137.508) % 360;
+  autoColorCount++;
+  return hslToHex(hue, 75, 62);
 }
 
 function hexToRgba(hex, alpha) {
@@ -332,7 +353,7 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-function buildSidebar(groupTraceIndices, surveys, startVisible) {
+function buildSidebar(groupTraceIndices, resolvedColors, startVisible) {
   const list = document.getElementById('survey-list');
   const names = Object.keys(groupTraceIndices);
 
@@ -350,7 +371,7 @@ function buildSidebar(groupTraceIndices, surveys, startVisible) {
 
     const swatch = document.createElement('span');
     swatch.className = 'swatch';
-    swatch.style.background = (surveys[name] && surveys[name].color) || SURVEY_COLORS[name] || '#ffffff';
+    swatch.style.background = resolvedColors[name];
 
     const label = document.createElement('span');
     label.textContent = name;
